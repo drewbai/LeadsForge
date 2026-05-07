@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: LeadsForge API
+  version: 0.0.1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Health response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/health.json'
+  /leads:
+    post:
+      summary: Create lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/lead.json'
+      responses:
+        '200':
+          description: Lead response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/lead.json'

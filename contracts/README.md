@@ -1,1 +1,7 @@
-Contracts placeholder — environment + API contracts will be added in Pass 3.
+# LeadsForge Contracts
+
+This is the LeadsForge contract layer.
+
+It defines shared environment and API contracts.
+
+Pass 4 will integrate Neon and migrations.
