@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
     "lint:py": "ruff check backend",
     "format:py": "ruff format backend"
   },
@@ -19,6 +21,10 @@
     "@testing-library/jest-dom": "*",
     "@testing-library/react": "*",
     "@vitejs/plugin-react": "*",
+    "@eslint/js": "*",
+    "eslint": "*",
+    "globals": "*",
+    "prettier": "*",
     "vitest": "*"
   }
 }
