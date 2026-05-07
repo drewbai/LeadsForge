@@ -1,0 +1,22 @@
+{
+  "name": "leadsforge-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "vite": "*"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "*",
+    "@testing-library/react": "*",
+    "@vitejs/plugin-react": "*",
+    "vitest": "*"
+  }
+}
