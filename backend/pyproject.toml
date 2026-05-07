@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "leadsforge-backend"
+version = "0.0.1"
+description = "LeadsForge backend skeleton"
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "*"
+uvicorn = { extras = ["standard"], version = "*" }
+pydantic = "*"
+python-dotenv = "*"
+httpx = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
