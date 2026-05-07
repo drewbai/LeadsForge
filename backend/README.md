@@ -1,0 +1,1 @@
+Backend placeholder — FastAPI will be scaffolded in Pass 1.

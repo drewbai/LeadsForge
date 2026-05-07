@@ -1,0 +1,1 @@
+Frontend placeholder — React will be scaffolded in Pass 2.

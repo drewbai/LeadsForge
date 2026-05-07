@@ -1,0 +1,1 @@
+Contracts placeholder — environment + API contracts will be added in Pass 3.
