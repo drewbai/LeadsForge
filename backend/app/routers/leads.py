@@ -27,13 +27,13 @@ async def create_lead(
     db: DbSession,
 ) -> LeadRead:
     lead = await lead_service.create_lead(db, lead_create)
-    return LeadRead.from_orm(lead)
+    return LeadRead.model_validate(lead)
 
 
 @router.get("/")
 async def list_leads(db: DbSession) -> list[LeadRead]:
     leads = await lead_service.list_leads(db)
-    return [LeadRead.from_orm(lead) for lead in leads]
+    return [LeadRead.model_validate(lead) for lead in leads]
 
 
 @router.get("/{lead_id}")
@@ -42,4 +42,4 @@ async def get_lead(lead_id: UUID, db: DbSession) -> LeadRead:
     if lead is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
-    return LeadRead.from_orm(lead)
+    return LeadRead.model_validate(lead)

@@ -1,4 +1,4 @@
-from pydantic.v1 import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr
 
 
 class IngestionLeadInput(BaseModel):

@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import AsyncSessionLocal

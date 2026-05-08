@@ -1,14 +1,31 @@
+[project]
+name = "leadsforge-backend"
+version = "0.0.1"
+description = "LeadsForge backend skeleton"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "httpx",
+]
+
 [tool.poetry]
 name = "leadsforge-backend"
 version = "0.0.1"
 description = "LeadsForge backend skeleton"
 authors = []
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "==3.12.8"
 fastapi = "*"
 uvicorn = { extras = ["standard"], version = "*" }
 pydantic = "*"
+pydantic-settings = "*"
 python-dotenv = "*"
 httpx = "*"
 

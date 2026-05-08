@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
 from app.services import scoring_service
 
