@@ -11,6 +11,7 @@ python = "==3.12.8"
 fastapi = "*"
 uvicorn = { extras = ["standard"], version = "*" }
 pydantic = "*"
+email-validator = "*"
 pydantic-settings = "*"
 python-dotenv = "*"
 httpx = "*"
