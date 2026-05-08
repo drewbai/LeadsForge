@@ -42,7 +42,8 @@ async def list_leads(db: DbSession) -> list[LeadRead]:
 @router.get("/db-test")
 async def db_test(session: AsyncSession = Depends(get_session)):
     result = await session.execute(text("SELECT NOW()"))
-    return {"db_time": result.scalar()}
+    ts = result.scalar_one()
+    return {"db_time": ts.isoformat() if hasattr(ts, "isoformat") else str(ts)}
 
 
 @router.get("/{lead_id}")
