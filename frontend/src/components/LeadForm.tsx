@@ -1,27 +1,17 @@
 import { useState } from "react";
 
-import { enrichLead } from "../api";
-
 type LeadFormProps = {
-  onEnriched: (enrichedLead: any) => void;
+  onCreate: (lead: { name: string; email: string; company: string }) => void;
 };
 
 export default function LeadForm(props: LeadFormProps) {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [company, setCompany] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const lead = { name, email, company };
-      const enriched = await enrichLead(lead);
-      props.onEnriched(enriched);
-    } finally {
-      setIsSubmitting(false);
-    }
+    props.onCreate({ name, email, company });
   }
 
   return (
@@ -52,9 +42,7 @@ export default function LeadForm(props: LeadFormProps) {
       </label>
 
       <div className="row">
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Enriching..." : "Enrich Lead"}
-        </button>
+        <button type="submit">Create Lead</button>
       </div>
     </form>
   );

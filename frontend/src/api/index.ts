@@ -17,3 +17,7 @@ export async function enrichLead(lead: any): Promise<any> {
 export async function scoreLead(lead: any): Promise<any> {
   return await postJson(SCORE_URL, { lead });
 }
+
+export async function reScoreLead(lead: any): Promise<any> {
+  return await postJson(SCORE_URL, { lead });
+}
