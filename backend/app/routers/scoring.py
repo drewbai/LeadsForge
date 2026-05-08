@@ -1,16 +1,12 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
 
+from app.schemas.lead_pipeline import LeadRecord, SingleLeadRequest
 from app.services import scoring_service
-
 
 router = APIRouter(prefix="/scoring", tags=["scoring"])
 
 
-class SingleLeadRequest(BaseModel):
-    lead: dict
-
-
-@router.post("/single")
-async def score_single(request: SingleLeadRequest) -> dict:
-    return await scoring_service.score_lead(request.lead)
+@router.post("/single", response_model=LeadRecord)
+async def score_single(request: SingleLeadRequest) -> LeadRecord:
+    data = await scoring_service.score_lead(request.lead)
+    return LeadRecord.model_validate(data)

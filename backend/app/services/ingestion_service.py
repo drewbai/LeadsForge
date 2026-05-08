@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.ingestion.models import IngestionResult
 from app.ingestion import tasks
+from app.ingestion.models import IngestionResult
 
 
 async def ingest_csv_file(file_path: str, db: AsyncSession) -> list[IngestionResult]:

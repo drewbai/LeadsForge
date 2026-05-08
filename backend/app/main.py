@@ -6,7 +6,6 @@ from app.routers.ingestion import router as ingestion_router
 from app.routers.leads import router as leads_router
 from app.routers.scoring import router as scoring_router
 
-
 app = FastAPI()
 app.include_router(health_router)
 app.include_router(ingestion_router)

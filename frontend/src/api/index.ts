@@ -1,5 +1,10 @@
-const ENRICH_URL = "http://localhost:8000/enrichment/single";
-const SCORE_URL = "http://localhost:8000/scoring/single";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000").replace(
+  /\/$/,
+  "",
+);
+
+const ENRICH_URL = `${API_BASE}/enrichment/single`;
+const SCORE_URL = `${API_BASE}/scoring/single`;
 
 async function postJson(url: string, body: unknown): Promise<any> {
   const res = await fetch(url, {

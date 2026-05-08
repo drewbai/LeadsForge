@@ -10,7 +10,6 @@ from app.db.engine import AsyncSessionLocal
 from app.schemas.lead import LeadCreate, LeadRead
 from app.services import lead_service
 
-
 router = APIRouter(prefix="/leads", tags=["leads"])
 
 

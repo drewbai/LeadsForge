@@ -7,7 +7,6 @@ from app.db.engine import AsyncSessionLocal
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate
 
-
 SessionFactory = AsyncSessionLocal
 
 

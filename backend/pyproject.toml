@@ -21,6 +21,7 @@ aiosqlite = "*"
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-anyio = "*"
+ruff = "*"
 
 [tool.ruff]
 line-length = 100

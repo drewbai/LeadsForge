@@ -9,7 +9,6 @@ from app.db.engine import AsyncSessionLocal
 from app.ingestion.models import IngestionResult
 from app.services import ingestion_service
 
-
 router = APIRouter(prefix="/ingestion", tags=["ingestion"])
 
 

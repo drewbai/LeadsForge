@@ -5,7 +5,6 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 
@@ -33,7 +32,7 @@ class Settings(BaseSettings):
             host = (parsed.hostname or "").lower()
             # channel_binding is libpq-only and breaks asyncpg.
             skip = {"channel_binding"}
-            # Neon copies often include libpq ssl query params; asyncpg uses connect_args SSL instead.
+            # Neon URLs may carry libpq ssl=* params; asyncpg uses engine connect_args for TLS.
             if host.endswith(".neon.tech"):
                 skip |= {
                     "sslmode",

@@ -73,7 +73,12 @@ async def test_invalid_manual_ingestion_returns_errors_and_creates_nothing(tmp_p
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
             "/ingestion/manual",
-            json={"leads": [{"email": "", "source": "manual"}, {"email": "lead@example.com", "source": ""}]},
+            json={
+                "leads": [
+                    {"email": "", "source": "manual"},
+                    {"email": "lead@example.com", "source": ""},
+                ]
+            },
         )
         assert response.status_code == 200
         assert response.json() == [

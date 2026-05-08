@@ -1,17 +1,26 @@
 # LeadsForge Backend
 
-This is the LeadsForge backend skeleton.
+FastAPI service managed with **Poetry**.
 
-This is Pass 1 and contains no business logic.
+## Setup
 
-Pass 2 will add the frontend and Pass 3 will add contracts.
+```bash
+poetry install
+cp .env.example .env
+```
 
-## Code Quality: Ruff
+Put `DATABASE_URL` in `.env` (see `.env.example`). Do **not** commit `.env`.
 
-Ruff is used for linting and formatting.
+## Run
 
-Run `ruff check backend --fix` to autofix issues.
+```bash
+poetry run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
 
-Run `ruff format backend` to format code.
+## Tests & lint (from `backend/`)
 
-Pre-commit will enforce Ruff on staged files.
+```bash
+poetry run pytest
+poetry run ruff check .
+poetry run ruff format .
+```
