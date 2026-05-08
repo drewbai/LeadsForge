@@ -10,8 +10,7 @@ packages = [{ include = "app" }]
 python = "==3.12.8"
 fastapi = "*"
 uvicorn = { extras = ["standard"], version = "*" }
-pydantic = "*"
-email-validator = "*"
+pydantic = { version = "*", extras = ["email"] }
 pydantic-settings = "*"
 python-dotenv = "*"
 httpx = "*"
