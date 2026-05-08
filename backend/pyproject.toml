@@ -1,23 +1,9 @@
-[project]
-name = "leadsforge-backend"
-version = "0.0.1"
-description = "LeadsForge backend skeleton"
-requires-python = ">=3.12"
-
-dependencies = [
-    "fastapi",
-    "uvicorn[standard]",
-    "pydantic",
-    "pydantic-settings",
-    "python-dotenv",
-    "httpx",
-]
-
 [tool.poetry]
 name = "leadsforge-backend"
 version = "0.0.1"
 description = "LeadsForge backend skeleton"
 authors = []
+readme = "README.md"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
@@ -28,9 +14,13 @@ pydantic = "*"
 pydantic-settings = "*"
 python-dotenv = "*"
 httpx = "*"
+sqlalchemy = "*"
+asyncpg = "*"
+aiosqlite = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
+pytest-anyio = "*"
 
 [tool.ruff]
 line-length = 100
