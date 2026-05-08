@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import AsyncSessionLocal
@@ -17,6 +18,8 @@ async def get_db() -> AsyncIterator[AsyncSession]:
     async with AsyncSessionLocal() as session:
         yield session
 
+
+get_session = get_db
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
@@ -34,6 +37,12 @@ async def create_lead(
 async def list_leads(db: DbSession) -> list[LeadRead]:
     leads = await lead_service.list_leads(db)
     return [LeadRead.model_validate(lead) for lead in leads]
+
+
+@router.get("/db-test")
+async def db_test(session: AsyncSession = Depends(get_session)):
+    result = await session.execute(text("SELECT NOW()"))
+    return {"db_time": result.scalar()}
 
 
 @router.get("/{lead_id}")
