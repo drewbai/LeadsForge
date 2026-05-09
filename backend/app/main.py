@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
+from app.api.v1.health_router import router as v1_health_router
 from app.api.v1.ranking_router import router as ranking_router
 from app.routers.enrichment import router as enrichment_router
 from app.routers.health import router as health_router
@@ -9,6 +10,7 @@ from app.routers.ingestion import router as ingestion_router
 from app.routers.leads import router as leads_router
 from app.routers.scoring import router as scoring_router
 from app.services.ai import router as ai_router
+from app.version import VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -20,16 +22,18 @@ app.include_router(enrichment_router)
 app.include_router(scoring_router)
 app.include_router(ai_router)
 app.include_router(ranking_router)
+app.include_router(v1_health_router)
 
 
 @app.on_event("startup")
-async def _startup_log_ai_pipelines() -> None:
+async def _startup_log_pipelines() -> None:
     logger.info(
-        "AI pipelines available: summary, insights, embeddings, "
-        "semantic_search, hybrid_search, ranking"
+        "LeadsForge backend %s — pipelines available: summary, insights, "
+        "embeddings, semantic_search, hybrid_search, ranking, health",
+        VERSION,
     )
 
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "version": VERSION}
