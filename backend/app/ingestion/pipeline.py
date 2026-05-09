@@ -5,6 +5,7 @@ from app.ingestion.normalizers import normalize_email, normalize_source
 from app.ingestion.validators import validate_ingestion_lead
 from app.schemas.lead import LeadCreate
 from app.services import lead_service
+from app.services.tasks.dispatcher import enqueue_ranking_recompute
 
 
 async def run_ingestion(leads: list[IngestionLeadInput], db: AsyncSession) -> list[IngestionResult]:
@@ -21,10 +22,12 @@ async def run_ingestion(leads: list[IngestionLeadInput], db: AsyncSession) -> li
             results.append(IngestionResult(success=False, errors=errors))
             continue
 
-        await lead_service.create_lead(
+        created = await lead_service.create_lead(
             db,
             LeadCreate(email=normalized_lead.email, source=normalized_lead.source),
         )
+        if created is not None and getattr(created, "id", None) is not None:
+            await enqueue_ranking_recompute(created.id)
         results.append(IngestionResult(success=True, errors=[]))
 
     return results
