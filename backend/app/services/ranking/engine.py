@@ -9,6 +9,8 @@ from sqlalchemy import MetaData, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.lead import Lead
+from app.models.metric import METRIC_LEAD_RANKED
+from app.services.metrics.service import fire_and_forget_increment
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,14 @@ INSIGHT_TYPE_WEIGHTS: dict[str, float] = {
     "sentiment": 0.4,
     "risk": -0.5,
 }
+
+
+def _score_bucket(score: float) -> str:
+    if score >= 75.0:
+        return "high"
+    if score >= 35.0:
+        return "mid"
+    return "low"
 
 
 def _clamp01(value: float) -> float:
@@ -202,6 +212,11 @@ async def compute_lead_ranking(
     lead_record.ranking_explanation = explanation
     lead_record.last_ranked_at = now
     await session.commit()
+
+    await fire_and_forget_increment(
+        METRIC_LEAD_RANKED,
+        {"lead_id": str(lead_id), "score_bucket": _score_bucket(final_score)},
+    )
 
     return {
         "lead_id": str(lead_id),

@@ -2,15 +2,21 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.metric import METRIC_LEAD_CREATED
 from app.repositories import lead_repository
 from app.schemas.lead import LeadCreate
 from app.services.events.activity import record_activity_event
+from app.services.metrics.service import fire_and_forget_increment
 from app.services.ranking.triggers import enqueue_ranking_recompute
 
 
 async def create_lead(db: AsyncSession, lead_create: LeadCreate):
     lead = await lead_repository.insert_lead(db, lead_create)
     await enqueue_ranking_recompute(lead.id)
+    await fire_and_forget_increment(
+        METRIC_LEAD_CREATED,
+        {"source": lead.source} if lead.source else None,
+    )
     await record_activity_event(
         session=db,
         lead_id=lead.id,
