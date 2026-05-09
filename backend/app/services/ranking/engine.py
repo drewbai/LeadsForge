@@ -8,6 +8,8 @@ from typing import Any
 from sqlalchemy import MetaData, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.lead import Lead
+
 logger = logging.getLogger(__name__)
 
 
@@ -157,14 +159,17 @@ async def compute_lead_ranking(
     session: AsyncSession,
     lead_id: uuid.UUID,
 ) -> dict[str, Any] | None:
+    if isinstance(lead_id, str):
+        lead_id = uuid.UUID(lead_id)
+
     metadata = MetaData()
     await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")
 
-    exists = await session.execute(select(leads.c.id).where(leads.c.id == lead_id))
-    if exists.first() is None:
+    lead_record = await session.get(Lead, lead_id)
+    if lead_record is None:
         return None
 
     activity_score, activity_meta = await _activity_score(session, lead_id, metadata)
@@ -193,15 +198,9 @@ async def compute_lead_ranking(
     explanation = " | ".join(explanation_parts)
 
     now = datetime.now(timezone.utc)
-    await session.execute(
-        update(leads)
-        .where(leads.c.id == lead_id)
-        .values(
-            ranking_score=final_score,
-            ranking_explanation=explanation,
-            last_ranked_at=now,
-        )
-    )
+    lead_record.ranking_score = final_score
+    lead_record.ranking_explanation = explanation
+    lead_record.last_ranked_at = now
     await session.commit()
 
     return {
