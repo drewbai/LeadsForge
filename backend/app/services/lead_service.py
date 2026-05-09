@@ -4,12 +4,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories import lead_repository
 from app.schemas.lead import LeadCreate
+from app.services.events.activity import record_activity_event
 from app.services.ranking.triggers import enqueue_ranking_recompute
 
 
 async def create_lead(db: AsyncSession, lead_create: LeadCreate):
     lead = await lead_repository.insert_lead(db, lead_create)
     await enqueue_ranking_recompute(lead.id)
+    await record_activity_event(
+        session=db,
+        lead_id=lead.id,
+        event_type="lead.created",
+        payload={"email": lead.email, "source": lead.source},
+        performed_by="system",
+    )
     return lead
 
 
