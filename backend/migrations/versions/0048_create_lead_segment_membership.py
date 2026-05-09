@@ -11,7 +11,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0048_create_lead_segment_membership"
 down_revision: Union[str, None] = "0047_create_lead_segment_rule"
 branch_labels: Union[str, Sequence[str], None] = None

@@ -11,7 +11,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0021_create_lead_assignment_history"
 down_revision: Union[str, None] = "0020_create_lead_assignment"
 branch_labels: Union[str, Sequence[str], None] = None

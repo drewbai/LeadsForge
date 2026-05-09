@@ -9,7 +9,6 @@ from typing import Sequence, Union
 
 from alembic import op
 
-
 revision: str = "0018_create_lead_activity_timeline"
 down_revision: Union[str, None] = "0017_create_lead_campaign_attribution"
 branch_labels: Union[str, Sequence[str], None] = None

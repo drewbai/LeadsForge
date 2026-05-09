@@ -11,7 +11,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0006_create_lead_pipeline_stages"
 down_revision: Union[str, None] = "0005_create_lead_tags_and_link"
 branch_labels: Union[str, Sequence[str], None] = None

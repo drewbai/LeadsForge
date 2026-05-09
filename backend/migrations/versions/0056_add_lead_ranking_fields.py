@@ -10,7 +10,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "0056_add_lead_ranking_fields"
 down_revision: Union[str, None] = "0055_create_lead_ai_embedding"
 branch_labels: Union[str, Sequence[str], None] = None

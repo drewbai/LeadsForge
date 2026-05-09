@@ -11,7 +11,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0051_create_automation_action"
 down_revision: Union[str, None] = "0050_create_automation_trigger"
 branch_labels: Union[str, Sequence[str], None] = None

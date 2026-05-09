@@ -12,7 +12,6 @@ from alembic import op
 from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0055_create_lead_ai_embedding"
 down_revision: Union[str, None] = "0054_create_lead_ai_insight"
 branch_labels: Union[str, Sequence[str], None] = None

@@ -11,7 +11,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0026_create_lead_webhook_event"
 down_revision: Union[str, None] = "0025_create_lead_tag_tables"
 branch_labels: Union[str, Sequence[str], None] = None
