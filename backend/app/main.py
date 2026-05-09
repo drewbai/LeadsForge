@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
+from app.api.v1.metrics_router import router as metrics_router
 from app.api.v1.ranking_router import router as ranking_router
 from app.routers.enrichment import router as enrichment_router
 from app.routers.health import router as health_router
@@ -20,13 +21,14 @@ app.include_router(enrichment_router)
 app.include_router(scoring_router)
 app.include_router(ai_router)
 app.include_router(ranking_router)
+app.include_router(metrics_router)
 
 
 @app.on_event("startup")
-async def _startup_log_ai_pipelines() -> None:
+async def _startup_log_pipelines() -> None:
     logger.info(
-        "AI pipelines available: summary, insights, embeddings, "
-        "semantic_search, hybrid_search, ranking"
+        "Pipelines available: summary, insights, embeddings, "
+        "semantic_search, hybrid_search, ranking, metrics"
     )
 
 

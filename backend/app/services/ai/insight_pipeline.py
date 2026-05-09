@@ -8,7 +8,9 @@ from typing import Any
 from sqlalchemy import MetaData, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.metric import METRIC_AI_INSIGHT_GENERATED
 from app.services.ai.base import AIProvider
+from app.services.metrics.service import fire_and_forget_increment
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +65,15 @@ async def generate_insights_for_lead(
             }
         )
     await session.commit()
+    for item in inserted:
+        await fire_and_forget_increment(
+            METRIC_AI_INSIGHT_GENERATED,
+            {
+                "lead_id": str(lead_id),
+                "model": resolved_model,
+                "insight_type": item.get("insight_type"),
+            },
+        )
     return inserted
 
 

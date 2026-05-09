@@ -2,12 +2,19 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.metric import METRIC_LEAD_CREATED
 from app.repositories import lead_repository
 from app.schemas.lead import LeadCreate
+from app.services.metrics.service import fire_and_forget_increment
 
 
 async def create_lead(db: AsyncSession, lead_create: LeadCreate):
-    return await lead_repository.insert_lead(db, lead_create)
+    lead = await lead_repository.insert_lead(db, lead_create)
+    await fire_and_forget_increment(
+        METRIC_LEAD_CREATED,
+        {"source": lead.source} if lead.source else None,
+    )
+    return lead
 
 
 async def get_lead(db: AsyncSession, lead_id: UUID):

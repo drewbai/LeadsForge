@@ -8,7 +8,9 @@ from typing import Any
 from sqlalchemy import MetaData, Table, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.metric import METRIC_AI_SUMMARY_GENERATED
 from app.services.ai.base import AIProvider
+from app.services.metrics.service import fire_and_forget_increment
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,10 @@ async def generate_summary_for_lead(
         )
     )
     await session.commit()
+    await fire_and_forget_increment(
+        METRIC_AI_SUMMARY_GENERATED,
+        {"lead_id": str(lead_id), "model": resolved_model},
+    )
     return {
         "id": str(new_id),
         "lead_id": str(lead_id),

@@ -1,8 +1,12 @@
+from uuid import UUID
+
 from app.enrichment.providers.domain_provider import DomainEnrichmentProvider
 from app.enrichment.providers.email_quality_provider import EmailQualityProvider
+from app.models.metric import METRIC_LEAD_ENRICHED
+from app.services.metrics.service import fire_and_forget_increment
 
 
-async def enrich_lead(lead: dict) -> dict:
+async def enrich_lead(lead: dict, *, lead_id: UUID | None = None) -> dict:
     providers = (
         DomainEnrichmentProvider(),
         EmailQualityProvider(),
@@ -10,4 +14,9 @@ async def enrich_lead(lead: dict) -> dict:
     current = dict(lead)
     for provider in providers:
         current = await provider.enrich(current)
+    if current != lead:
+        await fire_and_forget_increment(
+            METRIC_LEAD_ENRICHED,
+            {"lead_id": str(lead_id)} if lead_id is not None else None,
+        )
     return current
