@@ -9,5 +9,12 @@ class Settings(BaseSettings):
     ENV: str = Field(default="development")
     DEBUG: bool = Field(default=False)
 
+    AI_PROVIDER: str = Field(default="openai")
+    OPENAI_API_KEY: str | None = Field(default=None)
+    OPENAI_SUMMARY_MODEL: str = Field(default="gpt-4o-mini")
+    OPENAI_INSIGHT_MODEL: str = Field(default="gpt-4o-mini")
+    OPENAI_EMBEDDING_MODEL: str = Field(default="text-embedding-3-small")
+    OPENAI_EMBEDDING_DIM: int = Field(default=1536)
+
 
 settings = Settings()

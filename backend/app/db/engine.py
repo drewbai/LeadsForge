@@ -1,7 +1,8 @@
 import ssl
+from typing import AsyncIterator
 from urllib.parse import parse_qsl, urlparse
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app.core.settings import get_settings
@@ -35,3 +36,8 @@ AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     expire_on_commit=False,
 )
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with AsyncSessionLocal() as session:
+        yield session
