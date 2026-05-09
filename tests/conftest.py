@@ -1,27 +1,38 @@
 """Pytest configuration and shared fixtures for the LeadsForge backend tests.
 
-Strategy:
-* Each test gets an ephemeral SQLite (aiosqlite) database with all currently
-  registered ORM tables created via ``Base.metadata.create_all``.
-* The FastAPI app's database dependencies are overridden so endpoints use the
-  test session.
-* Tests for modules that have not yet been merged into the current branch
-  (e.g. tasks/metrics/subscriptions) use ``pytest.importorskip`` and are
-  skipped automatically when those modules are absent.
+Key guarantees:
+* Tests **never** connect to Neon or any production database. The
+  ``DATABASE_URL`` environment variable is forced to an in-memory SQLite
+  URL **before** any application module is imported.
+* Each test gets an ephemeral SQLite (aiosqlite) database with all
+  registered ORM tables created via ``Base.metadata.create_all``. No
+  Alembic migrations are executed during tests.
+* The FastAPI app's database dependencies (``get_db`` / ``get_session``)
+  are overridden so endpoints use the per-test session.
+* External HTTP calls (httpx.AsyncClient) are blocked at the socket
+  layer unless a test explicitly patches ``httpx.AsyncClient`` first.
+* Tests for modules not yet merged onto the current branch
+  (e.g. tasks/metrics/subscriptions) use ``pytest.importorskip`` and
+  skip automatically when those modules are absent.
 """
 from __future__ import annotations
 
 import asyncio
 import os
+import socket
 from collections.abc import AsyncIterator, Iterator
 from typing import Any
 
+# ---------------------------------------------------------------------------
+# Force a safe, offline test environment BEFORE importing application code.
+# ---------------------------------------------------------------------------
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ.setdefault("ENV", "test")
+os.environ.setdefault("DEBUG", "false")
+os.environ.setdefault("APP_NAME", "LeadsForge-Test")
+
 import pytest
 import pytest_asyncio
-
-os.environ.setdefault(
-    "DATABASE_URL", "sqlite+aiosqlite:///:memory:"
-)
 
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
@@ -51,6 +62,42 @@ def _try_import_extra_models() -> None:
 _try_import_extra_models()
 
 
+# ---------------------------------------------------------------------------
+# Network isolation
+# ---------------------------------------------------------------------------
+_ALLOWED_HOSTS = {"127.0.0.1", "localhost", "::1", "testserver"}
+_real_socket_connect = socket.socket.connect
+_real_create_connection = socket.create_connection
+
+
+def _guarded_connect(self, address, *args, **kwargs):
+    host = address[0] if isinstance(address, tuple) else str(address)
+    if host not in _ALLOWED_HOSTS:
+        raise RuntimeError(
+            f"Blocked outbound network connection to {host!r} during tests"
+        )
+    return _real_socket_connect(self, address, *args, **kwargs)
+
+
+def _guarded_create_connection(address, *args, **kwargs):
+    host = address[0] if isinstance(address, tuple) else str(address)
+    if host not in _ALLOWED_HOSTS:
+        raise RuntimeError(
+            f"Blocked outbound network connection to {host!r} during tests"
+        )
+    return _real_create_connection(address, *args, **kwargs)
+
+
+@pytest.fixture(autouse=True)
+def _block_external_network(monkeypatch):
+    monkeypatch.setattr(socket.socket, "connect", _guarded_connect)
+    monkeypatch.setattr(socket, "create_connection", _guarded_create_connection)
+    yield
+
+
+# ---------------------------------------------------------------------------
+# Event loop
+# ---------------------------------------------------------------------------
 @pytest.fixture(scope="session")
 def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
     loop = asyncio.new_event_loop()
@@ -58,6 +105,9 @@ def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
     loop.close()
 
 
+# ---------------------------------------------------------------------------
+# Async DB engine and session
+# ---------------------------------------------------------------------------
 @pytest_asyncio.fixture
 async def test_engine():
     engine = create_async_engine(
@@ -82,35 +132,38 @@ async def session_factory(test_engine):
 
 @pytest_asyncio.fixture
 async def db_session(session_factory) -> AsyncIterator[AsyncSession]:
-    """Yield a session; the surrounding ephemeral engine drops state per test."""
     async with session_factory() as session:
         yield session
 
 
+# ---------------------------------------------------------------------------
+# FastAPI app + DB dependency overrides
+# ---------------------------------------------------------------------------
 @pytest_asyncio.fixture
 async def app_with_db(test_engine, session_factory):
-    """FastAPI app instance with all DB-related dependencies overridden."""
+    """Yield the FastAPI app with all DB dependencies pointed at SQLite."""
     from app.main import app
 
-    async def override_get_session() -> AsyncIterator[AsyncSession]:
+    async def override_get_db() -> AsyncIterator[AsyncSession]:
         async with session_factory() as session:
             yield session
 
     overrides: dict = {}
 
-    try:
-        from app.db.engine import get_session as engine_get_session
-
-        overrides[engine_get_session] = override_get_session
-    except Exception:
-        pass
-
-    try:
-        from app.routers.leads import get_db as leads_get_db
-
-        overrides[leads_get_db] = override_get_session
-    except Exception:
-        pass
+    for module_path, attr in (
+        ("app.db.engine", "get_session"),
+        ("app.db.session", "get_db"),
+        ("app.db.session", "get_session"),
+        ("app.routers.leads", "get_db"),
+        ("app.routers.leads", "get_session"),
+    ):
+        try:
+            mod = __import__(module_path, fromlist=[attr])
+            dep = getattr(mod, attr, None)
+            if dep is not None:
+                overrides[dep] = override_get_db
+        except Exception:
+            continue
 
     app.dependency_overrides.update(overrides)
     try:
@@ -127,9 +180,11 @@ async def client(app_with_db) -> AsyncIterator[AsyncClient]:
         yield ac
 
 
+# ---------------------------------------------------------------------------
+# Seed helpers
+# ---------------------------------------------------------------------------
 @pytest_asyncio.fixture
 async def seeded_lead(db_session: AsyncSession) -> Any:
-    """Insert a baseline Lead row and return it."""
     from tests.factories.lead_factory import build_lead
 
     lead = build_lead()
@@ -139,9 +194,11 @@ async def seeded_lead(db_session: AsyncSession) -> Any:
     return lead
 
 
+# ---------------------------------------------------------------------------
+# Optional service patches
+# ---------------------------------------------------------------------------
 @pytest.fixture
 def patch_health_session(monkeypatch, session_factory):
-    """Force HealthService internal sessions to use the test session factory."""
     health = pytest.importorskip("app.services.health.service")
     monkeypatch.setattr(health, "AsyncSessionLocal", session_factory, raising=False)
     return session_factory
@@ -149,7 +206,6 @@ def patch_health_session(monkeypatch, session_factory):
 
 @pytest.fixture
 def patch_dispatcher_session(monkeypatch, session_factory):
-    """Force subscription dispatcher to use the test session factory (when present)."""
     try:
         dispatcher = __import__(
             "app.services.subscriptions.dispatcher", fromlist=["dispatcher"]
