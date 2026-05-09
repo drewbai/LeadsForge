@@ -67,7 +67,12 @@ def upgrade() -> None:
     )
     op.create_index("ix_lead_segment_membership_segment_id", "lead_segment_membership", ["segment_id"], unique=False)
     op.create_index("ix_lead_segment_membership_lead_id", "lead_segment_membership", ["lead_id"], unique=False)
-    op.create_index("ix_lead_segment_membership_membership_source", "lead_segment_membership", ["membership_source"], unique=False)
+    op.create_index(
+        "ix_lead_segment_membership_membership_source",
+        "lead_segment_membership",
+        ["membership_source"],
+        unique=False,
+    )
     op.create_index("ix_lead_segment_membership_added_by", "lead_segment_membership", ["added_by"], unique=False)
     op.create_index("ix_lead_segment_membership_added_at", "lead_segment_membership", ["added_at"], unique=False)
 
