@@ -5,12 +5,12 @@ Revises: 0037_create_lead_call_log
 Create Date: 2026-05-08 19:48:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0038_create_lead_sms_log"
 down_revision: Union[str, None] = "0037_create_lead_call_log"
@@ -46,8 +46,7 @@ def upgrade() -> None:
             name="ck_lead_sms_log_direction",
         ),
         sa.CheckConstraint(
-            "(direction = 'outbound' AND sent_at IS NOT NULL) "
-            "OR (direction = 'inbound' AND received_at IS NOT NULL)",
+            "(direction = 'outbound' AND sent_at IS NOT NULL) OR (direction = 'inbound' AND received_at IS NOT NULL)",
             name="ck_lead_sms_log_direction_timestamp",
         ),
     )

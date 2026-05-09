@@ -35,7 +35,5 @@ def serialize_lead(lead: Lead) -> dict[str, Any]:
         "created_at": lead.created_at.isoformat() if lead.created_at else None,
         "ranking_score": lead.ranking_score,
         "ranking_explanation": lead.ranking_explanation,
-        "last_ranked_at": (
-            lead.last_ranked_at.isoformat() if lead.last_ranked_at else None
-        ),
+        "last_ranked_at": (lead.last_ranked_at.isoformat() if lead.last_ranked_at else None),
     }

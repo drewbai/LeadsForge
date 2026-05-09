@@ -5,12 +5,12 @@ Revises: 0003_add_lead_status_enum
 Create Date: 2026-05-08 18:30:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0004_create_lead_assignment"
 down_revision: Union[str, None] = "0003_add_lead_status_enum"

@@ -41,11 +41,7 @@ class Settings(BaseSettings):
                     "sslrootcert",
                     "sslcrl",
                 }
-            q = [
-                (k, val)
-                for k, val in parse_qsl(parsed.query, keep_blank_values=True)
-                if k.lower() not in skip
-            ]
+            q = [(k, val) for k, val in parse_qsl(parsed.query, keep_blank_values=True) if k.lower() not in skip]
             url = urlunparse(parsed._replace(query=urlencode(q)))
         return url
 

@@ -5,12 +5,12 @@ Revises: 0015_create_lead_merge_history
 Create Date: 2026-05-08 18:55:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0016_create_lead_source"
 down_revision: Union[str, None] = "0015_create_lead_merge_history"

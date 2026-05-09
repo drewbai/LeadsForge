@@ -5,12 +5,12 @@ Revises: 0041_create_lead_task
 Create Date: 2026-05-08 19:56:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0042_create_lead_task_history"
 down_revision: Union[str, None] = "0041_create_lead_task"
@@ -47,8 +47,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint(
-            "action_type IN ('created', 'updated', 'status_change', "
-            "'assigned', 'completed')",
+            "action_type IN ('created', 'updated', 'status_change', 'assigned', 'completed')",
             name="ck_lead_task_history_action_type",
         ),
     )

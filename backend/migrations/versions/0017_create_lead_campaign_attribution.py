@@ -5,12 +5,12 @@ Revises: 0016_create_lead_source
 Create Date: 2026-05-08 18:56:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0017_create_lead_campaign_attribution"
 down_revision: Union[str, None] = "0016_create_lead_source"

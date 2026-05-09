@@ -5,12 +5,12 @@ Revises: 0051_create_automation_action
 Create Date: 2026-05-08 20:14:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0052_create_automation_run_log"
 down_revision: Union[str, None] = "0051_create_automation_action"

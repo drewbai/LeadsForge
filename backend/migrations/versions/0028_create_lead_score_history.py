@@ -5,12 +5,12 @@ Revises: 0027_create_lead_score
 Create Date: 2026-05-08 19:28:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0028_create_lead_score_history"
 down_revision: Union[str, None] = "0027_create_lead_score"
@@ -19,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score_history "
-        "ON lead_score_history;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score_history ON lead_score_history;")
     op.drop_index(
         "ix_lead_score_history_changed_at",
         table_name="lead_score_history",
@@ -83,10 +80,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score_history "
-        "ON lead_score_history;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score_history ON lead_score_history;")
     op.drop_index(
         "ix_lead_score_history_changed_at",
         table_name="lead_score_history",

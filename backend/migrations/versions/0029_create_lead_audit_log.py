@@ -5,12 +5,12 @@ Revises: 0028_create_lead_score_history
 Create Date: 2026-05-08 19:30:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0029_create_lead_audit_log"
 down_revision: Union[str, None] = "0028_create_lead_score_history"
@@ -19,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_audit_log "
-        "ON lead_audit_log;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_audit_log ON lead_audit_log;")
     op.drop_index("ix_lead_audit_log_created_at", table_name="lead_audit_log")
     op.drop_index("ix_lead_audit_log_action_type", table_name="lead_audit_log")
     op.drop_index("ix_lead_audit_log_lead_id", table_name="lead_audit_log")
@@ -96,10 +93,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_audit_log "
-        "ON lead_audit_log;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_audit_log ON lead_audit_log;")
     op.drop_index("ix_lead_audit_log_created_at", table_name="lead_audit_log")
     op.drop_index("ix_lead_audit_log_changed_by", table_name="lead_audit_log")
     op.drop_index("ix_lead_audit_log_field_name", table_name="lead_audit_log")

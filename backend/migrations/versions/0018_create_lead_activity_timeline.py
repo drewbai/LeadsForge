@@ -5,10 +5,10 @@ Revises: 0017_create_lead_campaign_attribution
 Create Date: 2026-05-08 19:00:00.000000
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
-
 
 revision: str = "0018_create_lead_activity_timeline"
 down_revision: Union[str, None] = "0017_create_lead_campaign_attribution"
@@ -183,13 +183,9 @@ DROP_VIEW_SQL = "DROP MATERIALIZED VIEW IF EXISTS lead_activity_timeline;"
 
 def upgrade() -> None:
     op.execute(CREATE_VIEW_SQL)
+    op.execute("CREATE INDEX ix_lead_activity_timeline_lead_id ON lead_activity_timeline (lead_id);")
     op.execute(
-        "CREATE INDEX ix_lead_activity_timeline_lead_id "
-        "ON lead_activity_timeline (lead_id);"
-    )
-    op.execute(
-        "CREATE INDEX ix_lead_activity_timeline_activity_timestamp "
-        "ON lead_activity_timeline (activity_timestamp DESC);"
+        "CREATE INDEX ix_lead_activity_timeline_activity_timestamp ON lead_activity_timeline (activity_timestamp DESC);"
     )
     op.execute("REFRESH MATERIALIZED VIEW lead_activity_timeline;")
 

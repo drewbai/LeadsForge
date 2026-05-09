@@ -5,12 +5,12 @@ Revises: 0031_create_lead_note
 Create Date: 2026-05-08 19:37:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0032_create_lead_status_change"
 down_revision: Union[str, None] = "0031_create_lead_note"

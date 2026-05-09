@@ -5,12 +5,12 @@ Revises:
 Create Date: 2026-05-08 18:21:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0001_create_leads_table"
 down_revision: Union[str, None] = None

@@ -5,12 +5,12 @@ Revises: 0010_create_lead_webhook_events
 Create Date: 2026-05-08 18:45:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0011_create_lead_score"
 down_revision: Union[str, None] = "0010_create_lead_webhook_events"

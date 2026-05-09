@@ -5,12 +5,12 @@ Revises: 0045_create_lead_tag_link
 Create Date: 2026-05-08 20:06:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0046_create_lead_segment"
 down_revision: Union[str, None] = "0045_create_lead_tag_link"

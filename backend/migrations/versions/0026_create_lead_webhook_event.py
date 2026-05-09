@@ -5,12 +5,12 @@ Revises: 0025_create_lead_tag_tables
 Create Date: 2026-05-08 19:24:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0026_create_lead_webhook_event"
 down_revision: Union[str, None] = "0025_create_lead_tag_tables"
@@ -19,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_webhook_event "
-        "ON lead_webhook_event;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_webhook_event ON lead_webhook_event;")
     op.drop_index(
         "ix_lead_webhook_event_response_status",
         table_name="lead_webhook_event",
@@ -92,10 +89,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_webhook_event "
-        "ON lead_webhook_event;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_webhook_event ON lead_webhook_event;")
     op.drop_index(
         "ix_lead_webhook_event_received_at",
         table_name="lead_webhook_event",

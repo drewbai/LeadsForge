@@ -5,12 +5,12 @@ Revises: 0053_create_lead_ai_summary
 Create Date: 2026-05-08 20:19:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0054_create_lead_ai_insight"
 down_revision: Union[str, None] = "0053_create_lead_ai_summary"
@@ -45,8 +45,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint(
-            "insight_type IN ('next_best_action', 'risk', 'opportunity', "
-            "'persona', 'sentiment')",
+            "insight_type IN ('next_best_action', 'risk', 'opportunity', 'persona', 'sentiment')",
             name="ck_lead_ai_insight_insight_type",
         ),
     )

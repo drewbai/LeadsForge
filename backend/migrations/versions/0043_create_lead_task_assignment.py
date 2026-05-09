@@ -5,12 +5,12 @@ Revises: 0042_create_lead_task_history
 Create Date: 2026-05-08 19:58:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0043_create_lead_task_assignment"
 down_revision: Union[str, None] = "0042_create_lead_task_history"

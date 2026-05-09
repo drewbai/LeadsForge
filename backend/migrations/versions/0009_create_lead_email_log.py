@@ -5,12 +5,12 @@ Revises: 0008_create_lead_attachments
 Create Date: 2026-05-08 18:42:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0009_create_lead_email_log"
 down_revision: Union[str, None] = "0008_create_lead_attachments"

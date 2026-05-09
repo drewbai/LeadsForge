@@ -5,12 +5,12 @@ Revises: 0039_create_lead_meeting_log
 Create Date: 2026-05-08 19:51:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0040_create_lead_reminder"
 down_revision: Union[str, None] = "0039_create_lead_meeting_log"
@@ -19,13 +19,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder ON lead_reminder;")
     op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder "
-        "ON lead_reminder;"
-    )
-    op.execute(
-        "ALTER TABLE lead_reminder_snooze "
-        "DROP CONSTRAINT IF EXISTS fk_lead_reminder_snooze_reminder_id_lead_reminder;"
+        "ALTER TABLE lead_reminder_snooze DROP CONSTRAINT IF EXISTS fk_lead_reminder_snooze_reminder_id_lead_reminder;"
     )
     op.drop_index("ix_lead_reminder_completed_at", table_name="lead_reminder")
     op.drop_index("ix_lead_reminder_due_at", table_name="lead_reminder")
@@ -66,8 +62,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint(
-            "(completed = false AND completed_at IS NULL) "
-            "OR (completed = true AND completed_at IS NOT NULL)",
+            "(completed = false AND completed_at IS NULL) OR (completed = true AND completed_at IS NOT NULL)",
             name="ck_lead_reminder_completed_at_consistency",
         ),
     )
@@ -96,13 +91,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder ON lead_reminder;")
     op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder "
-        "ON lead_reminder;"
-    )
-    op.execute(
-        "ALTER TABLE lead_reminder_snooze "
-        "DROP CONSTRAINT IF EXISTS fk_lead_reminder_snooze_reminder_id_lead_reminder;"
+        "ALTER TABLE lead_reminder_snooze DROP CONSTRAINT IF EXISTS fk_lead_reminder_snooze_reminder_id_lead_reminder;"
     )
     op.drop_index("ix_lead_reminder_created_at", table_name="lead_reminder")
     op.drop_index("ix_lead_reminder_created_by", table_name="lead_reminder")

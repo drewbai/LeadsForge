@@ -5,12 +5,12 @@ Revises: 0029_create_lead_audit_log
 Create Date: 2026-05-08 19:32:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0030_create_lead_merge_history"
 down_revision: Union[str, None] = "0029_create_lead_audit_log"
@@ -19,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_merge_history "
-        "ON lead_merge_history;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_merge_history ON lead_merge_history;")
     op.drop_index(
         "ix_lead_merge_history_created_at",
         table_name="lead_merge_history",
@@ -107,10 +104,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_merge_history "
-        "ON lead_merge_history;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_merge_history ON lead_merge_history;")
     op.drop_index(
         "ix_lead_merge_history_merged_at",
         table_name="lead_merge_history",

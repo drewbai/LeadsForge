@@ -5,12 +5,12 @@ Revises: 0022_create_lead_reminder
 Create Date: 2026-05-08 19:16:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0023_create_lead_reminder_snooze"
 down_revision: Union[str, None] = "0022_create_lead_reminder"

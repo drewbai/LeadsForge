@@ -86,9 +86,7 @@ async def refresh_insights_for_all_leads(
     total_insights = 0
     for lead_id in lead_ids:
         try:
-            inserted = await generate_insights_for_lead(
-                session, provider, lead_id, model_name=model_name
-            )
+            inserted = await generate_insights_for_lead(session, provider, lead_id, model_name=model_name)
             success += 1
             total_insights += len(inserted or [])
         except Exception:

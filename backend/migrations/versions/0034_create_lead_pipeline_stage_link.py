@@ -5,12 +5,12 @@ Revises: 0033_create_lead_pipeline_stage
 Create Date: 2026-05-08 19:40:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0034_create_lead_pipeline_stage_link"
 down_revision: Union[str, None] = "0033_create_lead_pipeline_stage"

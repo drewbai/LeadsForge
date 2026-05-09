@@ -5,12 +5,12 @@ Revises: 0002_create_lead_activity_log
 Create Date: 2026-05-08 18:28:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0003_add_lead_status_enum"
 down_revision: Union[str, None] = "0002_create_lead_activity_log"

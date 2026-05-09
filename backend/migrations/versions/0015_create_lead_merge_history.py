@@ -5,12 +5,12 @@ Revises: 0014_create_lead_audit_log
 Create Date: 2026-05-08 18:54:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0015_create_lead_merge_history"
 down_revision: Union[str, None] = "0014_create_lead_audit_log"

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import MetaData, func, select, update
+from sqlalchemy import MetaData, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.lead import Lead
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +55,7 @@ async def _activity_score(
     if activity_table is None:
         return 0.0, {"activity_count": 0}
     result = await session.execute(
-        select(func.count())
-        .select_from(activity_table)
-        .where(activity_table.c.lead_id == lead_id)
+        select(func.count()).select_from(activity_table).where(activity_table.c.lead_id == lead_id)
     )
     count = int(result.scalar() or 0)
     max_count = float(RANKING_THRESHOLDS["max_activity_count"])
@@ -72,9 +72,7 @@ async def _recency_score(
     if activity_table is None:
         return 0.0, {"days_since_last_activity": None}
     result = await session.execute(
-        select(func.max(activity_table.c.created_at)).where(
-            activity_table.c.lead_id == lead_id
-        )
+        select(func.max(activity_table.c.created_at)).where(activity_table.c.lead_id == lead_id)
     )
     last_at = result.scalar()
     if last_at is None:
@@ -118,11 +116,7 @@ async def _ai_insight_score(
     insight_table = metadata.tables.get("lead_ai_insight")
     if insight_table is None:
         return 0.0, {"insight_count": 0}
-    result = await session.execute(
-        select(insight_table.c.insight_type).where(
-            insight_table.c.lead_id == lead_id
-        )
-    )
+    result = await session.execute(select(insight_table.c.insight_type).where(insight_table.c.lead_id == lead_id))
     types = [row[0] for row in result.all()]
     if not types:
         return 0.0, {"insight_count": 0}
@@ -165,27 +159,24 @@ async def compute_lead_ranking(
     session: AsyncSession,
     lead_id: uuid.UUID,
 ) -> dict[str, Any] | None:
+    if isinstance(lead_id, str):
+        lead_id = uuid.UUID(lead_id)
+
     metadata = MetaData()
     await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")
 
-    exists = await session.execute(select(leads.c.id).where(leads.c.id == lead_id))
-    if exists.first() is None:
+    lead_record = await session.get(Lead, lead_id)
+    if lead_record is None:
         return None
 
     activity_score, activity_meta = await _activity_score(session, lead_id, metadata)
     recency_score, recency_meta = await _recency_score(session, lead_id, metadata)
-    enrichment_score, enrichment_meta = await _enrichment_score(
-        session, lead_id, metadata
-    )
-    insight_score, insight_meta = await _ai_insight_score(
-        session, lead_id, metadata
-    )
-    summary_score, summary_meta = await _ai_summary_score(
-        session, lead_id, metadata
-    )
+    enrichment_score, enrichment_meta = await _enrichment_score(session, lead_id, metadata)
+    insight_score, insight_meta = await _ai_insight_score(session, lead_id, metadata)
+    summary_score, summary_meta = await _ai_summary_score(session, lead_id, metadata)
 
     components = {
         "activity": activity_score,
@@ -194,9 +185,7 @@ async def compute_lead_ranking(
         "ai_insights": insight_score,
         "ai_summary": summary_score,
     }
-    total = sum(
-        components[key] * RANKING_WEIGHTS.get(key, 0.0) for key in components
-    )
+    total = sum(components[key] * RANKING_WEIGHTS.get(key, 0.0) for key in components)
     final_score = round(_clamp01(total) * 100.0, 2)
 
     explanation_parts = [
@@ -209,15 +198,9 @@ async def compute_lead_ranking(
     explanation = " | ".join(explanation_parts)
 
     now = datetime.now(timezone.utc)
-    await session.execute(
-        update(leads)
-        .where(leads.c.id == lead_id)
-        .values(
-            ranking_score=final_score,
-            ranking_explanation=explanation,
-            last_ranked_at=now,
-        )
-    )
+    lead_record.ranking_score = final_score
+    lead_record.ranking_explanation = explanation
+    lead_record.last_ranked_at = now
     await session.commit()
 
     return {

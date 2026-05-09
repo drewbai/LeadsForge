@@ -5,12 +5,12 @@ Revises: 0049_create_automation_workflow
 Create Date: 2026-05-08 20:12:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0050_create_automation_trigger"
 down_revision: Union[str, None] = "0049_create_automation_workflow"
@@ -46,13 +46,11 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint(
-            "trigger_type IN ('lead_created', 'status_changed', "
-            "'score_threshold', 'manual')",
+            "trigger_type IN ('lead_created', 'status_changed', 'score_threshold', 'manual')",
             name="ck_automation_trigger_trigger_type",
         ),
         sa.CheckConstraint(
-            "operator IS NULL OR operator IN "
-            "('=', '!=', '>', '<', '>=', '<=')",
+            "operator IS NULL OR operator IN ('=', '!=', '>', '<', '>=', '<=')",
             name="ck_automation_trigger_operator",
         ),
     )
