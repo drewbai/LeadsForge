@@ -5,6 +5,7 @@ Revises: 0024_create_lead_email_log
 Create Date: 2026-05-08 19:21:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_tag_link "
-        "ON lead_tag_link;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_tag_link ON lead_tag_link;")
     op.drop_index("ix_lead_tag_link_tag_id", table_name="lead_tag_link")
     op.drop_index("ix_lead_tag_link_lead_id", table_name="lead_tag_link")
     op.drop_table("lead_tag_link")
@@ -91,10 +89,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_tag_link "
-        "ON lead_tag_link;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_tag_link ON lead_tag_link;")
     op.drop_index("ix_lead_tag_link_tag_id", table_name="lead_tag_link")
     op.drop_index("ix_lead_tag_link_lead_id", table_name="lead_tag_link")
     op.drop_table("lead_tag_link")

@@ -1,4 +1,5 @@
 """Tests for app.services.routing.engine (skipped if not present on branch)."""
+
 from __future__ import annotations
 
 import pytest

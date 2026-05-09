@@ -1,4 +1,5 @@
 """Tests for the subscription service and dispatcher."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -24,12 +25,8 @@ async def test_create_subscription_persists(db_session) -> None:
 @pytest.mark.asyncio
 async def test_get_subscriptions_filters_by_event_type(db_session) -> None:
     svc = pytest.importorskip("app.services.subscriptions.service")
-    await svc.create_subscription(
-        db_session, "lead.created", "webhook", "https://a.example.com"
-    )
-    await svc.create_subscription(
-        db_session, "lead.enriched", "webhook", "https://b.example.com"
-    )
+    await svc.create_subscription(db_session, "lead.created", "webhook", "https://a.example.com")
+    await svc.create_subscription(db_session, "lead.enriched", "webhook", "https://b.example.com")
 
     rows = await svc.get_subscriptions(db_session, event_type="lead.created")
     assert len(rows) == 1
@@ -39,9 +36,7 @@ async def test_get_subscriptions_filters_by_event_type(db_session) -> None:
 @pytest.mark.asyncio
 async def test_deactivate_subscription_sets_inactive(db_session) -> None:
     svc = pytest.importorskip("app.services.subscriptions.service")
-    created = await svc.create_subscription(
-        db_session, "lead.created", "internal", "log"
-    )
+    created = await svc.create_subscription(db_session, "lead.created", "internal", "log")
     result = await svc.deactivate_subscription(db_session, created["id"])
     assert result is not None
     assert result["is_active"] is False
@@ -51,23 +46,17 @@ async def test_deactivate_subscription_sets_inactive(db_session) -> None:
 async def test_create_subscription_rejects_invalid_target_type(db_session) -> None:
     svc = pytest.importorskip("app.services.subscriptions.service")
     with pytest.raises(svc.SubscriptionValidationError):
-        await svc.create_subscription(
-            db_session, "lead.created", "carrier-pigeon", "n/a"
-        )
+        await svc.create_subscription(db_session, "lead.created", "carrier-pigeon", "n/a")
 
 
 @pytest.mark.asyncio
-async def test_dispatcher_posts_to_webhook(
-    db_session, patch_dispatcher_session
-) -> None:
+async def test_dispatcher_posts_to_webhook(db_session, patch_dispatcher_session) -> None:
     if patch_dispatcher_session is None:
         pytest.skip("subscription dispatcher not present")
     svc = pytest.importorskip("app.services.subscriptions.service")
     dispatcher = pytest.importorskip("app.services.subscriptions.dispatcher")
 
-    await svc.create_subscription(
-        db_session, "lead.created", "webhook", "https://example.com/hook"
-    )
+    await svc.create_subscription(db_session, "lead.created", "webhook", "https://example.com/hook")
 
     fake_response = MagicMock()
     fake_response.raise_for_status = MagicMock(return_value=None)
@@ -78,9 +67,7 @@ async def test_dispatcher_posts_to_webhook(
     fake_client.__aexit__.return_value = None
 
     with patch.object(dispatcher.httpx, "AsyncClient", return_value=fake_client):
-        summary = await dispatcher.dispatch_event(
-            db_session, "lead.created", {"lead_id": "abc"}
-        )
+        summary = await dispatcher.dispatch_event(db_session, "lead.created", {"lead_id": "abc"})
 
     assert summary["subscriber_count"] == 1
     assert summary["dispatched"] == 1
@@ -89,17 +76,13 @@ async def test_dispatcher_posts_to_webhook(
 
 
 @pytest.mark.asyncio
-async def test_dispatcher_records_failure_metric_on_webhook_error(
-    db_session, patch_dispatcher_session
-) -> None:
+async def test_dispatcher_records_failure_metric_on_webhook_error(db_session, patch_dispatcher_session) -> None:
     if patch_dispatcher_session is None:
         pytest.skip("subscription dispatcher not present")
     svc = pytest.importorskip("app.services.subscriptions.service")
     dispatcher = pytest.importorskip("app.services.subscriptions.dispatcher")
 
-    await svc.create_subscription(
-        db_session, "lead.created", "webhook", "https://example.com/hook"
-    )
+    await svc.create_subscription(db_session, "lead.created", "webhook", "https://example.com/hook")
 
     fake_client = AsyncMock()
     fake_client.post = AsyncMock(side_effect=RuntimeError("boom"))
@@ -107,18 +90,14 @@ async def test_dispatcher_records_failure_metric_on_webhook_error(
     fake_client.__aexit__.return_value = None
 
     with patch.object(dispatcher.httpx, "AsyncClient", return_value=fake_client):
-        summary = await dispatcher.dispatch_event(
-            db_session, "lead.created", {"lead_id": "abc"}
-        )
+        summary = await dispatcher.dispatch_event(db_session, "lead.created", {"lead_id": "abc"})
 
     assert summary["dispatched"] == 0
     assert summary["failed"] == 1
 
 
 @pytest.mark.asyncio
-async def test_dispatcher_invokes_internal_handler(
-    db_session, patch_dispatcher_session
-) -> None:
+async def test_dispatcher_invokes_internal_handler(db_session, patch_dispatcher_session) -> None:
     if patch_dispatcher_session is None:
         pytest.skip("subscription dispatcher not present")
     svc = pytest.importorskip("app.services.subscriptions.service")
@@ -131,12 +110,8 @@ async def test_dispatcher_invokes_internal_handler(
 
     dispatcher.register_internal_handler("test.handler", handler)
     try:
-        await svc.create_subscription(
-            db_session, "lead.created", "internal", "test.handler"
-        )
-        summary = await dispatcher.dispatch_event(
-            db_session, "lead.created", {"lead_id": "xyz"}
-        )
+        await svc.create_subscription(db_session, "lead.created", "internal", "test.handler")
+        summary = await dispatcher.dispatch_event(db_session, "lead.created", {"lead_id": "xyz"})
     finally:
         dispatcher.unregister_internal_handler("test.handler")
 

@@ -19,9 +19,7 @@ RECENT_ERROR_WINDOW_HOURS = 24
 
 async def _reflect_metadata(session: AsyncSession) -> MetaData:
     metadata = MetaData()
-    await session.run_sync(
-        lambda sync_session: metadata.reflect(bind=sync_session.bind)
-    )
+    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
     return metadata
 
 
@@ -71,19 +69,11 @@ async def _task_stats(
             "running": 0,
             "recent_errors": 0,
         }
-    pending = await _count_table(
-        session, metadata, "task", where_clause=table.c.status == "pending"
-    )
-    running = await _count_table(
-        session, metadata, "task", where_clause=table.c.status == "running"
-    )
+    pending = await _count_table(session, metadata, "task", where_clause=table.c.status == "pending")
+    running = await _count_table(session, metadata, "task", where_clause=table.c.status == "running")
     cutoff = datetime.now(timezone.utc) - timedelta(hours=RECENT_ERROR_WINDOW_HOURS)
-    recent_errors_clause = (table.c.status == "error") & (
-        getattr(table.c, "updated_at", table.c.created_at) >= cutoff
-    )
-    recent_errors = await _count_table(
-        session, metadata, "task", where_clause=recent_errors_clause
-    )
+    recent_errors_clause = (table.c.status == "error") & (getattr(table.c, "updated_at", table.c.created_at) >= cutoff)
+    recent_errors = await _count_table(session, metadata, "task", where_clause=recent_errors_clause)
     return {
         "available": True,
         "pending": pending or 0,
@@ -115,16 +105,12 @@ async def _subscription_stats(
         return {"available": False, "active": 0, "by_event_type": {}}
     try:
         active_result = await session.execute(
-            select(func.count())
-            .select_from(table)
-            .where(table.c.is_active.is_(True))
+            select(func.count()).select_from(table).where(table.c.is_active.is_(True))
         )
         active = int(active_result.scalar() or 0)
 
         grouped = await session.execute(
-            select(table.c.event_type, func.count())
-            .where(table.c.is_active.is_(True))
-            .group_by(table.c.event_type)
+            select(table.c.event_type, func.count()).where(table.c.is_active.is_(True)).group_by(table.c.event_type)
         )
         by_event_type = {row[0]: int(row[1]) for row in grouped.all()}
     except SQLAlchemyError:
@@ -138,9 +124,7 @@ async def _subscription_stats(
     }
 
 
-def _aggregate_status(
-    db: dict[str, Any], tasks: dict[str, Any]
-) -> str:
+def _aggregate_status(db: dict[str, Any], tasks: dict[str, Any]) -> str:
     if db.get("status") == "error":
         return "error"
     if tasks.get("recent_errors", 0) > 0 or db.get("status") == "degraded":
@@ -186,9 +170,7 @@ async def get_health() -> dict[str, Any]:
 
 async def _check_pending_migrations(session: AsyncSession) -> dict[str, Any]:
     try:
-        result = await session.execute(
-            text("SELECT version_num FROM alembic_version")
-        )
+        result = await session.execute(text("SELECT version_num FROM alembic_version"))
         rows = [row[0] for row in result.all()]
         return {
             "alembic_version_present": True,

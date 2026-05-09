@@ -5,6 +5,7 @@ Revises: 0047_create_lead_segment_rule
 Create Date: 2026-05-08 20:08:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

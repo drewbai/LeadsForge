@@ -5,6 +5,7 @@ Revises: 0015_create_lead_merge_history
 Create Date: 2026-05-08 18:55:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

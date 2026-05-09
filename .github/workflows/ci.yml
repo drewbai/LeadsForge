@@ -58,3 +58,43 @@ jobs:
             --cov-report=xml \
             --cov-report=term-missing \
             -q
+
+      - name: Check CI mail configuration
+        if: ${{ always() }}
+        id: mail_config
+        env:
+          SMTP_SERVER: ${{ secrets['CI_SMTP_SERVER'] }}
+          SMTP_PORT: ${{ secrets['CI_SMTP_PORT'] }}
+          SMTP_USERNAME: ${{ secrets['CI_SMTP_USERNAME'] }}
+          SMTP_PASSWORD: ${{ secrets['CI_SMTP_PASSWORD'] }}
+          EMAIL_FROM: ${{ secrets['CI_EMAIL_FROM'] }}
+          EMAIL_TO: ${{ secrets['CI_EMAIL_TO'] }}
+        run: |
+          if [ -n "$SMTP_SERVER" ] && [ -n "$SMTP_PORT" ] && [ -n "$SMTP_USERNAME" ] && [ -n "$SMTP_PASSWORD" ] && [ -n "$EMAIL_FROM" ] && [ -n "$EMAIL_TO" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "CI mail notifications are disabled because one or more SMTP secrets are missing."
+          fi
+
+      - name: Send failure mail
+        if: ${{ failure() && steps.mail_config.outputs.enabled == 'true' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets['CI_SMTP_SERVER'] }}
+          server_port: ${{ secrets['CI_SMTP_PORT'] }}
+          username: ${{ secrets['CI_SMTP_USERNAME'] }}
+          password: ${{ secrets['CI_SMTP_PASSWORD'] }}
+          subject: "CI failed: ${{ github.repository }} @ ${{ github.ref_name }}"
+          to: ${{ secrets['CI_EMAIL_TO'] }}
+          from: ${{ secrets['CI_EMAIL_FROM'] }}
+          body: |
+            LeadsForge CI failed.
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Event: ${{ github.event_name }}
+            Commit: ${{ github.sha }}
+            Workflow: ${{ github.workflow }}
+            Job: backend
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

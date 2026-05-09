@@ -5,6 +5,7 @@ Revises: 0026_create_lead_webhook_event
 Create Date: 2026-05-08 19:26:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score "
-        "ON lead_score;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score ON lead_score;")
     op.drop_index("ix_lead_score_score_value", table_name="lead_score")
     op.drop_index("ix_lead_score_created_at", table_name="lead_score")
     op.drop_index("ix_lead_score_lead_id", table_name="lead_score")
@@ -75,10 +73,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score "
-        "ON lead_score;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_score ON lead_score;")
     op.drop_index("ix_lead_score_updated_at", table_name="lead_score")
     op.drop_index("ix_lead_score_score", table_name="lead_score")
     op.drop_table("lead_score")

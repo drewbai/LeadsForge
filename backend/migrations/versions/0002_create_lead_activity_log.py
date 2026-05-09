@@ -5,6 +5,7 @@ Revises: 0001_create_leads_table
 Create Date: 2026-05-08 18:23:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

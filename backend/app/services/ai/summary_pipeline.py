@@ -54,9 +54,7 @@ async def generate_summary_for_lead(
     summary_text = await provider.generate_summary(dict(lead_data))
     resolved_model = model_name or getattr(provider, "summary_model", "unknown")
 
-    await session.execute(
-        delete(summary_table).where(summary_table.c.lead_id == lead_id)
-    )
+    await session.execute(delete(summary_table).where(summary_table.c.lead_id == lead_id))
 
     new_id = uuid.uuid4()
     generated_at = datetime.now(timezone.utc)
@@ -98,9 +96,7 @@ async def refresh_summaries_for_all_leads(
     failed = 0
     for lead_id in lead_ids:
         try:
-            await generate_summary_for_lead(
-                session, provider, lead_id, model_name=model_name
-            )
+            await generate_summary_for_lead(session, provider, lead_id, model_name=model_name)
             success += 1
         except Exception:
             logger.exception("Failed to refresh summary for lead %s", lead_id)

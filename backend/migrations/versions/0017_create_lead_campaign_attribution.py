@@ -5,6 +5,7 @@ Revises: 0016_create_lead_source
 Create Date: 2026-05-08 18:56:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

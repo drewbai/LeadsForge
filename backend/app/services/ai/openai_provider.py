@@ -71,9 +71,7 @@ class OpenAIProvider(AIProvider):
 
     def _headers(self) -> dict[str, str]:
         if not self._api_key:
-            raise RuntimeError(
-                "OPENAI_API_KEY is not configured; set it in environment or settings"
-            )
+            raise RuntimeError("OPENAI_API_KEY is not configured; set it in environment or settings")
         return {
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",
@@ -104,9 +102,7 @@ class OpenAIProvider(AIProvider):
             data = response.json()
         return data["choices"][0]["message"]["content"].strip()
 
-    async def generate_insights(
-        self, lead_data: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    async def generate_insights(self, lead_data: dict[str, Any]) -> list[dict[str, Any]]:
         prompt = (
             "You are a sales analyst. For the following lead, return a JSON "
             "array of insight objects. Each object must have:\n"

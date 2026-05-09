@@ -5,6 +5,7 @@ Revises: 0021_create_lead_assignment_history
 Create Date: 2026-05-08 19:10:30.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder "
-        "ON lead_reminder;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder ON lead_reminder;")
     op.drop_index("ix_lead_reminder_remind_at", table_name="lead_reminder")
     op.drop_index("ix_lead_reminder_lead_id", table_name="lead_reminder")
     op.drop_table("lead_reminder")
@@ -76,10 +74,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder "
-        "ON lead_reminder;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_reminder ON lead_reminder;")
     op.drop_index("ix_lead_reminder_completed_at", table_name="lead_reminder")
     op.drop_index("ix_lead_reminder_due_at", table_name="lead_reminder")
     op.drop_index("ix_lead_reminder_lead_id", table_name="lead_reminder")

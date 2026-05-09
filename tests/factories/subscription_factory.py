@@ -1,4 +1,5 @@
 """Factory helpers for Subscription model. Skips when subscription model not present."""
+
 from __future__ import annotations
 
 from typing import Any

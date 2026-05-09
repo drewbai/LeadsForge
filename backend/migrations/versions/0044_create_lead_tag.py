@@ -5,6 +5,7 @@ Revises: 0043_create_lead_task_assignment
 Create Date: 2026-05-08 19:59:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "ALTER TABLE lead_tag_link "
-        "DROP CONSTRAINT IF EXISTS fk_lead_tag_link_tag_id_leadtag;"
-    )
+    op.execute("ALTER TABLE lead_tag_link DROP CONSTRAINT IF EXISTS fk_lead_tag_link_tag_id_leadtag;")
     op.drop_table("leadtag")
 
     op.create_table(
@@ -58,10 +56,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "ALTER TABLE lead_tag_link "
-        "DROP CONSTRAINT IF EXISTS fk_lead_tag_link_tag_id_leadtag;"
-    )
+    op.execute("ALTER TABLE lead_tag_link DROP CONSTRAINT IF EXISTS fk_lead_tag_link_tag_id_leadtag;")
     op.drop_index("ix_leadtag_created_at", table_name="leadtag")
     op.drop_table("leadtag")
 

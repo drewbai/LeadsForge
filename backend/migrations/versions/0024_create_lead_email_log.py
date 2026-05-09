@@ -5,6 +5,7 @@ Revises: 0023_create_lead_reminder_snooze
 Create Date: 2026-05-08 19:18:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_email_log "
-        "ON lead_email_log;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_email_log ON lead_email_log;")
     op.drop_index("ix_lead_email_log_created_at", table_name="lead_email_log")
     op.drop_index("ix_lead_email_log_message_id", table_name="lead_email_log")
     op.drop_index("ix_lead_email_log_lead_id", table_name="lead_email_log")
@@ -55,8 +53,7 @@ def upgrade() -> None:
             name="ck_lead_email_log_direction",
         ),
         sa.CheckConstraint(
-            "(direction = 'outbound' AND sent_at IS NOT NULL) "
-            "OR (direction = 'inbound' AND received_at IS NOT NULL)",
+            "(direction = 'outbound' AND sent_at IS NOT NULL) OR (direction = 'inbound' AND received_at IS NOT NULL)",
             name="ck_lead_email_log_direction_timestamp",
         ),
     )
@@ -100,10 +97,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_email_log "
-        "ON lead_email_log;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_email_log ON lead_email_log;")
     op.drop_index("ix_lead_email_log_created_at", table_name="lead_email_log")
     op.drop_index("ix_lead_email_log_received_at", table_name="lead_email_log")
     op.drop_index("ix_lead_email_log_sent_at", table_name="lead_email_log")

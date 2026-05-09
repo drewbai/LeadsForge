@@ -5,6 +5,7 @@ Revises: 0010_create_lead_webhook_events
 Create Date: 2026-05-08 18:45:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

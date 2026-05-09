@@ -1,12 +1,12 @@
 """API tests for /leads endpoints."""
+
 from __future__ import annotations
 
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy import select
-
 from app.models.lead import Lead
+from sqlalchemy import select
 
 
 @pytest.mark.asyncio

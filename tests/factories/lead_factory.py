@@ -1,14 +1,13 @@
 """Factory helpers for Lead model instances."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.lead import Lead
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 _COUNTER = {"n": 0}
 
@@ -46,7 +45,5 @@ async def create_lead(session: AsyncSession, **overrides: Any) -> Lead:
     return lead
 
 
-async def create_leads(
-    session: AsyncSession, count: int, **overrides: Any
-) -> list[Lead]:
+async def create_leads(session: AsyncSession, count: int, **overrides: Any) -> list[Lead]:
     return [await create_lead(session, **overrides) for _ in range(count)]

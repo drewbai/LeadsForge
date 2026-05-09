@@ -5,6 +5,7 @@ Revises: 0048_create_lead_segment_membership
 Create Date: 2026-05-08 20:09:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -46,8 +47,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name", name="uq_automation_workflow_name"),
         sa.CheckConstraint(
-            "trigger_type IN ('lead_created', 'status_changed', "
-            "'score_threshold', 'manual')",
+            "trigger_type IN ('lead_created', 'status_changed', 'score_threshold', 'manual')",
             name="ck_automation_workflow_trigger_type",
         ),
     )

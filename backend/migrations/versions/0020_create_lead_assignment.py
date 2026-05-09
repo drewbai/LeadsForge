@@ -5,6 +5,7 @@ Revises: 0019_create_activity_timeline_triggers
 Create Date: 2026-05-08 19:08:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_assignment "
-        "ON lead_assignment;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_assignment ON lead_assignment;")
     op.drop_index("ix_lead_assignment_assigned_to", table_name="lead_assignment")
     op.drop_index("ix_lead_assignment_lead_id", table_name="lead_assignment")
     op.drop_table("lead_assignment")
@@ -75,10 +73,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_assignment "
-        "ON lead_assignment;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_assignment ON lead_assignment;")
     op.drop_index("ix_lead_assignment_created_at", table_name="lead_assignment")
     op.drop_index("ix_lead_assignment_assigned_to", table_name="lead_assignment")
     op.drop_index("ix_lead_assignment_lead_id", table_name="lead_assignment")

@@ -5,6 +5,7 @@ Revises: 0036_create_lead_attachment_version
 Create Date: 2026-05-08 19:46:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

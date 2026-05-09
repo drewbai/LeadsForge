@@ -1,4 +1,5 @@
 """API tests for /api/v1/health and /api/v1/readiness."""
+
 from __future__ import annotations
 
 import pytest
@@ -47,9 +48,7 @@ async def test_v1_readiness_endpoint(client, patch_health_session) -> None:
 
 
 @pytest.mark.asyncio
-async def test_v1_health_reports_seeded_lead_counts(
-    client, db_session, patch_health_session
-) -> None:
+async def test_v1_health_reports_seeded_lead_counts(client, db_session, patch_health_session) -> None:
     if not _has_v1_health_router():
         pytest.skip("v1 health router not present on this branch")
     from tests.factories.lead_factory import create_leads

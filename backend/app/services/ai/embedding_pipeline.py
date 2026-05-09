@@ -120,9 +120,7 @@ async def refresh_embeddings_for_all_leads(
     failed = 0
     for lead_id in lead_ids:
         try:
-            await generate_embedding_for_lead(
-                session, provider, lead_id, model_name=model_name
-            )
+            await generate_embedding_for_lead(session, provider, lead_id, model_name=model_name)
             success += 1
         except Exception:
             logger.exception("Failed to refresh embedding for lead %s", lead_id)

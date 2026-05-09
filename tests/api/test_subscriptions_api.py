@@ -1,4 +1,5 @@
 """API tests for /subscriptions endpoints (skipped when router absent)."""
+
 from __future__ import annotations
 
 import pytest
@@ -51,9 +52,7 @@ async def test_list_subscriptions_filters_by_event_type(client) -> None:
             "target": "https://b.example.com",
         },
     )
-    resp = await client.get(
-        "/api/v1/subscriptions", params={"event_type": "lead.created"}
-    )
+    resp = await client.get("/api/v1/subscriptions", params={"event_type": "lead.created"})
     assert resp.status_code == 200
     body = resp.json()
     items = body.get("items", body) if isinstance(body, dict) else body

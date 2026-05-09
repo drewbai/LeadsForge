@@ -5,6 +5,7 @@ Revises: 0054_create_lead_ai_insight
 Create Date: 2026-05-08 20:20:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

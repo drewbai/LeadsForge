@@ -1,23 +1,21 @@
 """Tests for app.services.lead_service."""
+
 from __future__ import annotations
 
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy import select
-
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate
 from app.services import lead_service
+from sqlalchemy import select
 
 
 @pytest.mark.asyncio
 async def test_create_lead_persists_row(db_session) -> None:
     payload = LeadCreate(email="alice@example.com", source="signup")
 
-    with patch.object(
-        lead_service, "record_activity_event", create=True, return_value=None
-    ) as hook:
+    with patch.object(lead_service, "record_activity_event", create=True, return_value=None) as hook:
         lead = await lead_service.create_lead(db_session, payload)
 
     assert lead.id is not None

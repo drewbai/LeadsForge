@@ -58,12 +58,8 @@ async def hybrid_search(
     if not query or not query.strip():
         return []
 
-    semantic_results = await semantic_search(
-        session, provider, query, limit=max(limit * 4, 20)
-    )
-    keyword_results = await _keyword_search(
-        session, query, limit=max(limit * 4, 20)
-    )
+    semantic_results = await semantic_search(session, provider, query, limit=max(limit * 4, 20))
+    keyword_results = await _keyword_search(session, query, limit=max(limit * 4, 20))
 
     combined: dict[str, dict[str, Any]] = {}
     for item in semantic_results:
@@ -90,10 +86,7 @@ async def hybrid_search(
 
     ranked: list[dict[str, Any]] = []
     for entry in combined.values():
-        score = (
-            semantic_weight * entry["semantic_score"]
-            + keyword_weight * entry["keyword_score"]
-        )
+        score = semantic_weight * entry["semantic_score"] + keyword_weight * entry["keyword_score"]
         entry["score"] = score
         ranked.append(entry)
     ranked.sort(key=lambda r: r["score"], reverse=True)

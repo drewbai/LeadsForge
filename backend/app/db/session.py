@@ -8,6 +8,7 @@ Tests should override ``get_db`` here (and ``get_session`` in
 ``app.db.engine``) via ``app.dependency_overrides`` to inject an
 in-memory SQLite session.
 """
+
 from __future__ import annotations
 
 from app.db.engine import AsyncSessionLocal, engine, get_session

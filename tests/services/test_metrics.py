@@ -1,4 +1,5 @@
 """Tests for the metrics service (skipped if not on branch)."""
+
 from __future__ import annotations
 
 import pytest
@@ -40,12 +41,10 @@ async def test_get_metrics_filters_by_type(db_session) -> None:
     only_created = await get_metrics(db_session, metric_type="lead_created")
     only_enriched = await get_metrics(db_session, metric_type="lead_enriched")
     assert all(
-        (r.get("metric_type") if isinstance(r, dict) else getattr(r, "metric_type"))
-        == "lead_created"
+        (r.get("metric_type") if isinstance(r, dict) else getattr(r, "metric_type")) == "lead_created"
         for r in only_created
     )
     assert all(
-        (r.get("metric_type") if isinstance(r, dict) else getattr(r, "metric_type"))
-        == "lead_enriched"
+        (r.get("metric_type") if isinstance(r, dict) else getattr(r, "metric_type")) == "lead_enriched"
         for r in only_enriched
     )

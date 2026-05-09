@@ -1,4 +1,5 @@
 """API tests for /tasks endpoints (skipped when router absent)."""
+
 from __future__ import annotations
 
 import pytest

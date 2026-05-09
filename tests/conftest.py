@@ -15,6 +15,7 @@ Key guarantees:
   (e.g. tasks/metrics/subscriptions) use ``pytest.importorskip`` and
   skip automatically when those modules are absent.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -31,9 +32,10 @@ os.environ.setdefault("ENV", "test")
 os.environ.setdefault("DEBUG", "false")
 os.environ.setdefault("APP_NAME", "LeadsForge-Test")
 
+import app.models.lead  # noqa: F401  ensure Lead is registered on Base.metadata
 import pytest
 import pytest_asyncio
-
+from app.db.base import Base
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -41,9 +43,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.pool import StaticPool
-
-from app.db.base import Base
-import app.models.lead  # noqa: F401  ensure Lead is registered on Base.metadata
 
 
 def _try_import_extra_models() -> None:
@@ -73,18 +72,14 @@ _real_create_connection = socket.create_connection
 def _guarded_connect(self, address, *args, **kwargs):
     host = address[0] if isinstance(address, tuple) else str(address)
     if host not in _ALLOWED_HOSTS:
-        raise RuntimeError(
-            f"Blocked outbound network connection to {host!r} during tests"
-        )
+        raise RuntimeError(f"Blocked outbound network connection to {host!r} during tests")
     return _real_socket_connect(self, address, *args, **kwargs)
 
 
 def _guarded_create_connection(address, *args, **kwargs):
     host = address[0] if isinstance(address, tuple) else str(address)
     if host not in _ALLOWED_HOSTS:
-        raise RuntimeError(
-            f"Blocked outbound network connection to {host!r} during tests"
-        )
+        raise RuntimeError(f"Blocked outbound network connection to {host!r} during tests")
     return _real_create_connection(address, *args, **kwargs)
 
 
@@ -207,9 +202,7 @@ def patch_health_session(monkeypatch, session_factory):
 @pytest.fixture
 def patch_dispatcher_session(monkeypatch, session_factory):
     try:
-        dispatcher = __import__(
-            "app.services.subscriptions.dispatcher", fromlist=["dispatcher"]
-        )
+        dispatcher = __import__("app.services.subscriptions.dispatcher", fromlist=["dispatcher"])
     except Exception:
         return None
     monkeypatch.setattr(dispatcher, "AsyncSessionLocal", session_factory, raising=False)

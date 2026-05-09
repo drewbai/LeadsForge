@@ -5,6 +5,7 @@ Revises: 0005_create_lead_tags_and_link
 Create Date: 2026-05-08 18:37:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

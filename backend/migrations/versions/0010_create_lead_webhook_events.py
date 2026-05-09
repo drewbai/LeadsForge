@@ -5,6 +5,7 @@ Revises: 0009_create_lead_email_log
 Create Date: 2026-05-08 18:43:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

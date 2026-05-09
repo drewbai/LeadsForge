@@ -1,11 +1,11 @@
 """Tests for app.services.ranking.engine."""
+
 from __future__ import annotations
 
 import pytest
-from sqlalchemy import select
-
 from app.models.lead import Lead
 from app.services.ranking import engine as ranking_engine
+from sqlalchemy import select
 
 
 @pytest.mark.asyncio
@@ -29,9 +29,7 @@ async def test_compute_lead_ranking_returns_score(db_session, seeded_lead) -> No
 @pytest.mark.asyncio
 async def test_compute_lead_ranking_persists_fields(db_session, seeded_lead) -> None:
     await ranking_engine.compute_lead_ranking(db_session, seeded_lead.id)
-    refreshed = (
-        await db_session.execute(select(Lead).where(Lead.id == seeded_lead.id))
-    ).scalar_one()
+    refreshed = (await db_session.execute(select(Lead).where(Lead.id == seeded_lead.id))).scalar_one()
     assert refreshed.ranking_score is not None
     assert refreshed.ranking_explanation is not None
     assert refreshed.last_ranked_at is not None

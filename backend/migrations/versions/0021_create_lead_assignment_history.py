@@ -5,6 +5,7 @@ Revises: 0020_create_lead_assignment
 Create Date: 2026-05-08 19:10:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

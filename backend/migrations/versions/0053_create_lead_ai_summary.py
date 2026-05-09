@@ -5,6 +5,7 @@ Revises: 0052_create_automation_run_log
 Create Date: 2026-05-08 20:18:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

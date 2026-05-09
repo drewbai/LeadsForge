@@ -5,6 +5,7 @@ Revises: 0034_create_lead_pipeline_stage_link
 Create Date: 2026-05-08 19:40:30.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

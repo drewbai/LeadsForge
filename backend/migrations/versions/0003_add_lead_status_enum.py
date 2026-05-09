@@ -5,6 +5,7 @@ Revises: 0002_create_lead_activity_log
 Create Date: 2026-05-08 18:28:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

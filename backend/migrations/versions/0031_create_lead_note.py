@@ -5,6 +5,7 @@ Revises: 0030_create_lead_merge_history
 Create Date: 2026-05-08 19:34:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -18,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_note "
-        "ON lead_note;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_note ON lead_note;")
     op.drop_index("ix_lead_note_created_at", table_name="lead_note")
     op.drop_index("ix_lead_note_lead_id", table_name="lead_note")
     op.drop_table("lead_note")
@@ -87,10 +85,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_refresh_activity_lead_note "
-        "ON lead_note;"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_refresh_activity_lead_note ON lead_note;")
     op.drop_index("ix_lead_note_created_at", table_name="lead_note")
     op.drop_index("ix_lead_note_pinned", table_name="lead_note")
     op.drop_index("ix_lead_note_author", table_name="lead_note")

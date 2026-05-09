@@ -5,6 +5,7 @@ Revises: 0003_add_lead_status_enum
 Create Date: 2026-05-08 18:30:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

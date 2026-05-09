@@ -5,6 +5,7 @@ Revises: 0022_create_lead_reminder
 Create Date: 2026-05-08 19:16:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

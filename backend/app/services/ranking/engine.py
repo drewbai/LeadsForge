@@ -53,9 +53,7 @@ async def _activity_score(
     if activity_table is None:
         return 0.0, {"activity_count": 0}
     result = await session.execute(
-        select(func.count())
-        .select_from(activity_table)
-        .where(activity_table.c.lead_id == lead_id)
+        select(func.count()).select_from(activity_table).where(activity_table.c.lead_id == lead_id)
     )
     count = int(result.scalar() or 0)
     max_count = float(RANKING_THRESHOLDS["max_activity_count"])
@@ -72,9 +70,7 @@ async def _recency_score(
     if activity_table is None:
         return 0.0, {"days_since_last_activity": None}
     result = await session.execute(
-        select(func.max(activity_table.c.created_at)).where(
-            activity_table.c.lead_id == lead_id
-        )
+        select(func.max(activity_table.c.created_at)).where(activity_table.c.lead_id == lead_id)
     )
     last_at = result.scalar()
     if last_at is None:
@@ -118,11 +114,7 @@ async def _ai_insight_score(
     insight_table = metadata.tables.get("lead_ai_insight")
     if insight_table is None:
         return 0.0, {"insight_count": 0}
-    result = await session.execute(
-        select(insight_table.c.insight_type).where(
-            insight_table.c.lead_id == lead_id
-        )
-    )
+    result = await session.execute(select(insight_table.c.insight_type).where(insight_table.c.lead_id == lead_id))
     types = [row[0] for row in result.all()]
     if not types:
         return 0.0, {"insight_count": 0}
@@ -177,15 +169,9 @@ async def compute_lead_ranking(
 
     activity_score, activity_meta = await _activity_score(session, lead_id, metadata)
     recency_score, recency_meta = await _recency_score(session, lead_id, metadata)
-    enrichment_score, enrichment_meta = await _enrichment_score(
-        session, lead_id, metadata
-    )
-    insight_score, insight_meta = await _ai_insight_score(
-        session, lead_id, metadata
-    )
-    summary_score, summary_meta = await _ai_summary_score(
-        session, lead_id, metadata
-    )
+    enrichment_score, enrichment_meta = await _enrichment_score(session, lead_id, metadata)
+    insight_score, insight_meta = await _ai_insight_score(session, lead_id, metadata)
+    summary_score, summary_meta = await _ai_summary_score(session, lead_id, metadata)
 
     components = {
         "activity": activity_score,
@@ -194,9 +180,7 @@ async def compute_lead_ranking(
         "ai_insights": insight_score,
         "ai_summary": summary_score,
     }
-    total = sum(
-        components[key] * RANKING_WEIGHTS.get(key, 0.0) for key in components
-    )
+    total = sum(components[key] * RANKING_WEIGHTS.get(key, 0.0) for key in components)
     final_score = round(_clamp01(total) * 100.0, 2)
 
     explanation_parts = [

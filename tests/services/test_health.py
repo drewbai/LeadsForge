@@ -1,4 +1,5 @@
 """Tests for the health service."""
+
 from __future__ import annotations
 
 import pytest
@@ -20,9 +21,7 @@ async def test_get_health_returns_ok_payload(patch_health_session, db_session) -
 
 
 @pytest.mark.asyncio
-async def test_get_health_counts_seeded_leads(
-    patch_health_session, db_session
-) -> None:
+async def test_get_health_counts_seeded_leads(patch_health_session, db_session) -> None:
     health = pytest.importorskip("app.services.health.service")
     from tests.factories.lead_factory import create_leads
 

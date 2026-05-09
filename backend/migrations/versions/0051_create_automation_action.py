@@ -5,6 +5,7 @@ Revises: 0050_create_automation_trigger
 Create Date: 2026-05-08 20:13:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -53,8 +54,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint(
-            "action_type IN ('send_email', 'send_sms', 'create_task', "
-            "'update_status', 'add_tag', 'webhook')",
+            "action_type IN ('send_email', 'send_sms', 'create_task', 'update_status', 'add_tag', 'webhook')",
             name="ck_automation_action_action_type",
         ),
     )

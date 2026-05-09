@@ -5,6 +5,7 @@ Revises: 0038_create_lead_sms_log
 Create Date: 2026-05-08 19:49:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -49,13 +50,11 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint(
-            "scheduled_end IS NULL OR scheduled_start IS NULL "
-            "OR scheduled_end >= scheduled_start",
+            "scheduled_end IS NULL OR scheduled_start IS NULL OR scheduled_end >= scheduled_start",
             name="ck_lead_meeting_log_scheduled_range",
         ),
         sa.CheckConstraint(
-            "actual_end IS NULL OR actual_start IS NULL "
-            "OR actual_end >= actual_start",
+            "actual_end IS NULL OR actual_start IS NULL OR actual_end >= actual_start",
             name="ck_lead_meeting_log_actual_range",
         ),
     )

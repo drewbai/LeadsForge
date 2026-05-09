@@ -5,6 +5,7 @@ Revises: 0051_create_automation_action
 Create Date: 2026-05-08 20:14:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

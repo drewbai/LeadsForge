@@ -5,6 +5,7 @@ Revises: 0040_create_lead_reminder
 Create Date: 2026-05-08 19:53:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -68,8 +69,7 @@ def upgrade() -> None:
             name="ck_lead_task_status",
         ),
         sa.CheckConstraint(
-            "(status = 'completed' AND completed_at IS NOT NULL) "
-            "OR (status <> 'completed')",
+            "(status = 'completed' AND completed_at IS NOT NULL) OR (status <> 'completed')",
             name="ck_lead_task_completed_at_consistency",
         ),
     )

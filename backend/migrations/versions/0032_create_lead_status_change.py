@@ -5,6 +5,7 @@ Revises: 0031_create_lead_note
 Create Date: 2026-05-08 19:37:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

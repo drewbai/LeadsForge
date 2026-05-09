@@ -1,4 +1,5 @@
 """Tests for the background task engine (skipped if not on branch)."""
+
 from __future__ import annotations
 
 from uuid import uuid4

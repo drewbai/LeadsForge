@@ -5,6 +5,7 @@ Revises: 0018_create_lead_activity_timeline
 Create Date: 2026-05-08 19:02:00.000000
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
