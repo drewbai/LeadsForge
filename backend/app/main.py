@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.api.v1.health_router import router as v1_health_router
 from app.api.v1.ranking_router import router as ranking_router
+from app.api.v1.routing_router import router as routing_router
 from app.api.v1.task_router import router as task_router
 from app.routers.enrichment import router as enrichment_router
 from app.routers.health import router as health_router
@@ -23,6 +24,7 @@ app.include_router(enrichment_router)
 app.include_router(scoring_router)
 app.include_router(ai_router)
 app.include_router(ranking_router)
+app.include_router(routing_router)
 app.include_router(task_router)
 app.include_router(v1_health_router)
 
@@ -31,7 +33,7 @@ app.include_router(v1_health_router)
 async def _startup_log_pipelines() -> None:
     logger.info(
         "LeadsForge backend %s — pipelines available: summary, insights, "
-        "embeddings, semantic_search, hybrid_search, ranking, tasks, health",
+        "embeddings, semantic_search, hybrid_search, ranking, routing, tasks, health",
         VERSION,
     )
 
