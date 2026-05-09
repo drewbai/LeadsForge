@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import MetaData, func, select, update
+from sqlalchemy import MetaData, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.lead import Lead
