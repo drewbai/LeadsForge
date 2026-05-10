@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from app.enrichment.providers.domain_provider import DomainEnrichmentProvider
@@ -7,7 +8,7 @@ from app.services.metrics.service import fire_and_forget_increment
 from app.services.ranking.triggers import enqueue_ranking_recompute
 
 
-async def enrich_lead(lead: dict, *, lead_id: UUID | None = None) -> dict:
+async def enrich_lead(lead: dict[str, Any], *, lead_id: UUID | None = None) -> dict[str, Any]:
     providers = (
         DomainEnrichmentProvider(),
         EmailQualityProvider(),

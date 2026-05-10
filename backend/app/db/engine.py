@@ -1,5 +1,5 @@
 import ssl
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 from urllib.parse import parse_qsl, urlparse
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -8,7 +8,7 @@ from sqlalchemy.pool import NullPool
 from app.core.settings import get_settings
 
 
-def _asyncpg_connect_args(database_url: str) -> dict:
+def _asyncpg_connect_args(database_url: str) -> dict[str, Any]:
     """asyncpg needs explicit TLS for Neon; ssl=True is flaky on some Windows stacks."""
     parsed = urlparse(database_url)
     host = (parsed.hostname or "").lower()

@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.lead import Lead, serialize_lead
 from app.models.task import Task
+from app.services.ai.base import AIProvider
 from app.services.tasks.service import (
     claim_pending_tasks,
     mark_error,
@@ -58,7 +59,7 @@ async def _handle_rank_lead(session: AsyncSession, payload: dict[str, Any]) -> d
     return {"status": "ok", "ranking": result}
 
 
-def _resolve_ai_provider():
+def _resolve_ai_provider() -> AIProvider:
     from app.services.ai.openai_provider import OpenAIProvider
 
     return OpenAIProvider()

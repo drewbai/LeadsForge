@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import MetaData, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.sync_reflection import reflect_bind
 from app.models.lead import Lead
 from app.models.metric import METRIC_LEAD_RANKED
 from app.services.metrics.service import fire_and_forget_increment
@@ -173,7 +174,7 @@ async def compute_lead_ranking(
         lead_id = uuid.UUID(lead_id)
 
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")
@@ -239,7 +240,7 @@ async def recompute_ranking_for_all_leads(
     session: AsyncSession,
 ) -> dict[str, Any]:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")

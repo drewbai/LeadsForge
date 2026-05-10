@@ -8,6 +8,7 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import AsyncSessionLocal
+from app.db.sync_reflection import reflect_bind
 from app.models.subscription import Subscription
 from app.services.subscriptions.service import get_active_subscriptions_for_event
 
@@ -57,7 +58,7 @@ async def _record_failure_activity(
         from sqlalchemy import MetaData, insert
 
         metadata = MetaData()
-        await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+        await session.run_sync(lambda s: reflect_bind(metadata, s))
         activity_table = metadata.tables.get("lead_activity_log")
         if activity_table is None:
             return

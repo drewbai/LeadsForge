@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -100,7 +100,8 @@ class OpenAIProvider(AIProvider):
             )
             response.raise_for_status()
             data = response.json()
-        return data["choices"][0]["message"]["content"].strip()
+        raw_content = data["choices"][0]["message"]["content"]
+        return cast(str, raw_content).strip()
 
     async def generate_insights(self, lead_data: dict[str, Any]) -> list[dict[str, Any]]:
         prompt = (

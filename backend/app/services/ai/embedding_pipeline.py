@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import MetaData, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.sync_reflection import reflect_bind
 from app.services.ai.base import AIProvider
 from app.services.ranking.triggers import enqueue_ranking_recompute
 
@@ -44,7 +45,7 @@ async def generate_embedding_for_lead(
     model_name: str | None = None,
 ) -> dict[str, Any] | None:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     summary_table = metadata.tables.get("lead_ai_summary")
     insight_table = metadata.tables.get("lead_ai_insight")
@@ -110,7 +111,7 @@ async def refresh_embeddings_for_all_leads(
     model_name: str | None = None,
 ) -> dict[str, Any]:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")

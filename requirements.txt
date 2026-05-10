@@ -11,3 +11,5 @@ aiosqlite
 pytest
 pytest-asyncio
 pytest-cov
+mypy
+ruff
