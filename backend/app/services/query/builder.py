@@ -7,7 +7,6 @@ from sqlalchemy.sql import ColumnElement
 
 from app.models.lead import Lead
 
-
 SORT_FIELD_MAP: dict[str, ColumnElement] = {
     "created_at": Lead.created_at,
     "ranking_score": Lead.ranking_score,

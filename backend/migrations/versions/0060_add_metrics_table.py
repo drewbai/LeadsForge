@@ -11,7 +11,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 revision: str = "0060_add_metrics_table"
 down_revision: Union[str, None] = "0061_add_subscription_table"
 branch_labels: Union[str, Sequence[str], None] = None

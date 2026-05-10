@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Float, JSON, String
+from sqlalchemy import JSON, DateTime, Float, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import TypeEngine
