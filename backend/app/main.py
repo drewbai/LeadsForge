@@ -37,7 +37,7 @@ app.include_router(v1_health_router)
 async def _startup_log_pipelines() -> None:
     logger.info(
         "LeadsForge backend %s — pipelines available: summary, insights, "
-        "embeddings, semantic_search, hybrid_search, ranking, query, tasks, "
+        "embeddings, semantic_search, hybrid_search, ranking, routing, query, tasks, "
         "subscriptions, metrics, health",
         VERSION,
     )
