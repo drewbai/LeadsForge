@@ -1,22 +1,12 @@
-"""API tests for /subscriptions endpoints (skipped when router absent)."""
+"""API tests for /api/v1/subscriptions endpoints."""
 
 from __future__ import annotations
 
 import pytest
 
 
-def _has_subscription_router() -> bool:
-    try:
-        __import__("app.api.v1.subscription_router")
-        return True
-    except Exception:
-        return False
-
-
 @pytest.mark.asyncio
 async def test_create_subscription_endpoint(client) -> None:
-    if not _has_subscription_router():
-        pytest.skip("subscription_router not present on this branch")
     resp = await client.post(
         "/api/v1/subscriptions",
         json={
@@ -25,7 +15,7 @@ async def test_create_subscription_endpoint(client) -> None:
             "target": "https://example.com/hook",
         },
     )
-    assert resp.status_code in (200, 201)
+    assert resp.status_code == 201
     body = resp.json()
     assert body["event_type"] == "lead.created"
     assert body["target_type"] == "webhook"
@@ -34,8 +24,6 @@ async def test_create_subscription_endpoint(client) -> None:
 
 @pytest.mark.asyncio
 async def test_list_subscriptions_filters_by_event_type(client) -> None:
-    if not _has_subscription_router():
-        pytest.skip("subscription_router not present on this branch")
     await client.post(
         "/api/v1/subscriptions",
         json={
@@ -55,14 +43,12 @@ async def test_list_subscriptions_filters_by_event_type(client) -> None:
     resp = await client.get("/api/v1/subscriptions", params={"event_type": "lead.created"})
     assert resp.status_code == 200
     body = resp.json()
-    items = body.get("items", body) if isinstance(body, dict) else body
+    items = body["items"]
     assert all(item["event_type"] == "lead.created" for item in items)
 
 
 @pytest.mark.asyncio
 async def test_deactivate_subscription_endpoint(client) -> None:
-    if not _has_subscription_router():
-        pytest.skip("subscription_router not present on this branch")
     create = await client.post(
         "/api/v1/subscriptions",
         json={
@@ -79,7 +65,5 @@ async def test_deactivate_subscription_endpoint(client) -> None:
 
 @pytest.mark.asyncio
 async def test_create_subscription_validates_payload(client) -> None:
-    if not _has_subscription_router():
-        pytest.skip("subscription_router not present on this branch")
     resp = await client.post("/api/v1/subscriptions", json={"event_type": "x"})
     assert resp.status_code in (400, 422)
