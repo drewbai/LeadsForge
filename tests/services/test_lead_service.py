@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from app.models.lead import Lead
@@ -15,17 +15,37 @@ from sqlalchemy import select
 async def test_create_lead_persists_row(db_session) -> None:
     payload = LeadCreate(email="alice@example.com", source="signup")
 
-    with patch.object(lead_service, "record_activity_event", create=True, return_value=None) as hook:
+    with (
+        patch.object(
+            lead_service,
+            "record_activity_event",
+            create=True,
+            new_callable=AsyncMock,
+        ) as activity_hook,
+        patch.object(
+            lead_service,
+            "enqueue_ranking_recompute",
+            new_callable=AsyncMock,
+        ) as ranking_hook,
+        patch.object(
+            lead_service,
+            "enqueue_routing_recompute",
+            new_callable=AsyncMock,
+        ) as routing_hook,
+    ):
         lead = await lead_service.create_lead(db_session, payload)
 
     assert lead.id is not None
     assert lead.email == "alice@example.com"
     assert lead.source == "signup"
 
-    if hook.called:
-        kwargs = hook.call_args.kwargs
+    if activity_hook.called:
+        kwargs = activity_hook.call_args.kwargs
         assert kwargs.get("event_type") == "lead.created"
         assert kwargs.get("lead_id") == lead.id
+
+    ranking_hook.assert_awaited_once_with(lead.id)
+    routing_hook.assert_awaited_once_with(lead.id)
 
     rows = (await db_session.execute(select(Lead))).scalars().all()
     assert len(rows) == 1
