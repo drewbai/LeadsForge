@@ -58,6 +58,16 @@ async def _handle_rank_lead(session: AsyncSession, payload: dict[str, Any]) -> d
     return {"status": "ok", "ranking": result}
 
 
+async def _handle_route_lead(session: AsyncSession, payload: dict[str, Any]) -> dict[str, Any]:
+    from app.services.routing.engine import route_lead
+
+    lead_id = _payload_lead_id(payload)
+    result = await route_lead(session, lead_id)
+    if result is None:
+        return {"status": "skipped", "reason": "lead not found", "lead_id": str(lead_id)}
+    return {"status": "ok", "routing": result}
+
+
 def _resolve_ai_provider():
     from app.services.ai.openai_provider import OpenAIProvider
 
@@ -98,12 +108,9 @@ async def _handle_ai_embedding(session: AsyncSession, payload: dict[str, Any]) -
 
 
 DISPATCH_TABLE: dict[str, TaskHandler] = {
-    # NOTE: "route_lead" handler is intentionally absent on dev because
-    # app.services.routing.engine is not yet merged (Phase 74). It will be
-    # re-added in the Phase 74 PR. Until then, POST /api/v1/tasks/enqueue
-    # with task_type="route_lead" returns HTTP 400 "Unknown task_type".
     "enrich_lead": _handle_enrich_lead,
     "rank_lead": _handle_rank_lead,
+    "route_lead": _handle_route_lead,
     "ai_summary": _handle_ai_summary,
     "ai_insight": _handle_ai_insight,
     "ai_embedding": _handle_ai_embedding,

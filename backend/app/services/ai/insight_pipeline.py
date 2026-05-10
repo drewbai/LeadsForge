@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.ai.base import AIProvider
 from app.services.ranking.triggers import enqueue_ranking_recompute
-from app.services.routing.engine import route_lead
+from app.services.routing.triggers import enqueue_routing_recompute
 
 logger = logging.getLogger(__name__)
 
@@ -66,10 +66,7 @@ async def generate_insights_for_lead(
         )
     await session.commit()
     await enqueue_ranking_recompute(lead_id)
-    try:
-        await route_lead(session, lead_id)
-    except Exception:
-        logger.exception("Routing after insights failed for lead %s", lead_id)
+    await enqueue_routing_recompute(lead_id)
     return inserted
 
 

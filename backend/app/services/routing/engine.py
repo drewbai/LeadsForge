@@ -161,14 +161,3 @@ async def route_lead(
     }
 
 
-async def trigger_routing(lead_id: uuid.UUID) -> dict[str, Any] | None:
-    if lead_id is None:
-        return None
-    from app.db.engine import AsyncSessionLocal
-
-    try:
-        async with AsyncSessionLocal() as session:
-            return await route_lead(session, lead_id)
-    except Exception:
-        logger.exception("Routing failed for lead %s", lead_id)
-        return None
