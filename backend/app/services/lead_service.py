@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories import lead_repository
 from app.schemas.lead import LeadCreate
-from app.services.tasks.dispatcher import enqueue_ranking_recompute
+from app.services.ranking.triggers import enqueue_ranking_recompute
 
 
 async def create_lead(db: AsyncSession, lead_create: LeadCreate):

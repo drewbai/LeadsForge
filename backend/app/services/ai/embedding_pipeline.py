@@ -9,7 +9,7 @@ from sqlalchemy import MetaData, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.ai.base import AIProvider
-from app.services.tasks.dispatcher import enqueue_ranking_recompute
+from app.services.ranking.triggers import enqueue_ranking_recompute
 
 logger = logging.getLogger(__name__)
 
