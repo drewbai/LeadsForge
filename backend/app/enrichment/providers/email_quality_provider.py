@@ -1,10 +1,14 @@
+from __future__ import annotations
+
+from typing import Any
+
 from app.enrichment.base import EnrichmentProvider
 
 _FREE_DOMAINS = frozenset({"gmail.com", "yahoo.com", "outlook.com"})
 
 
 class EmailQualityProvider(EnrichmentProvider):
-    async def enrich(self, lead: dict) -> dict:
+    async def enrich(self, lead: dict[str, Any]) -> dict[str, Any]:
         result = dict(lead)
         email = result.get("email")
         if not email or not isinstance(email, str):

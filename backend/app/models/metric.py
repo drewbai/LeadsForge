@@ -9,7 +9,7 @@ from sqlalchemy.types import TypeEngine
 
 from app.db.base import Base
 
-_JSON_PORTABLE: TypeEngine = JSON().with_variant(JSONB(), "postgresql")
+_JSON_PORTABLE: TypeEngine[Any] = JSON().with_variant(JSONB(), "postgresql")
 
 
 METRIC_LEAD_CREATED = "lead_created"

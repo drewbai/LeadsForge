@@ -36,7 +36,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install ruff
 
       - name: Ruff lint (backend)
         working-directory: backend
@@ -45,6 +44,10 @@ jobs:
       - name: Ruff format check (backend)
         working-directory: backend
         run: ruff format --check .
+
+      - name: Mypy strict (backend)
+        working-directory: backend
+        run: mypy --strict app
 
       - name: Pytest with coverage
         # Run from repo root so the workspace pytest.ini is used and the

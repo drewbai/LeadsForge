@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ingestion.models import IngestionResult
@@ -11,6 +13,6 @@ async def ingest_from_csv(file_path: str, db: AsyncSession) -> list[IngestionRes
     return await run_ingestion(leads, db)
 
 
-async def ingest_from_manual(leads: list[dict], db: AsyncSession) -> list[IngestionResult]:
+async def ingest_from_manual(leads: list[dict[str, Any]], db: AsyncSession) -> list[IngestionResult]:
     lead_inputs = await ingest_manual(leads)
     return await run_ingestion(lead_inputs, db)

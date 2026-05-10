@@ -9,6 +9,7 @@ from sqlalchemy import MetaData, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import get_session
+from app.db.sync_reflection import reflect_bind
 from app.services.ranking.engine import (
     compute_lead_ranking,
     recompute_ranking_for_all_leads,
@@ -55,7 +56,7 @@ async def ranking_status(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise HTTPException(status_code=500, detail="leads table not found")

@@ -5,6 +5,7 @@ from typing import Any, Iterable
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.selectable import Select
 
 from app.models.lead import Lead, serialize_lead
 from app.services.query.builder import (
@@ -28,7 +29,7 @@ def _build_filtered_query(
     max_score: float | None,
     assigned_to: str | None,
     source: str | None,
-):
+) -> Select[Any]:
     query = select(Lead)
     query = apply_text_search(query, text)
     query = apply_tag_filter(query, tags)

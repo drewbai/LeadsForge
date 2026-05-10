@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import MetaData, Table, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.sync_reflection import reflect_bind
 from app.models.metric import METRIC_AI_SUMMARY_GENERATED
 from app.services.ai.base import AIProvider
 from app.services.metrics.service import fire_and_forget_increment
@@ -23,8 +24,7 @@ def _summary_table() -> Table:
 
 async def _get_lead_dict(session: AsyncSession, lead_id: uuid.UUID) -> dict[str, Any] | None:
     metadata = MetaData()
-    leads = Table("leads", metadata, autoload_replace=False, extend_existing=True)
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         return None
@@ -43,7 +43,7 @@ async def generate_summary_for_lead(
     model_name: str | None = None,
 ) -> dict[str, Any] | None:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     summary_table = metadata.tables.get("lead_ai_summary")
     if leads is None or summary_table is None:
@@ -92,7 +92,7 @@ async def refresh_summaries_for_all_leads(
     model_name: str | None = None,
 ) -> dict[str, Any]:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")

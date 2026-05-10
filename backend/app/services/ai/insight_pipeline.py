@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import MetaData, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.sync_reflection import reflect_bind
 from app.models.metric import METRIC_AI_INSIGHT_GENERATED
 from app.services.ai.base import AIProvider
 from app.services.metrics.service import fire_and_forget_increment
@@ -24,7 +25,7 @@ async def generate_insights_for_lead(
     model_name: str | None = None,
 ) -> list[dict[str, Any]] | None:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     insight_table = metadata.tables.get("lead_ai_insight")
     if leads is None or insight_table is None:
@@ -86,7 +87,7 @@ async def refresh_insights_for_all_leads(
     model_name: str | None = None,
 ) -> dict[str, Any]:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")
