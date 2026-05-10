@@ -37,10 +37,11 @@ async def test_ingestion_failed_validation_does_not_enqueue(db_session, monkeypa
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
 
-    inputs = [IngestionLeadInput(email="not-an-email", source="signup")]
+    inputs = [IngestionLeadInput(email="ok@example.com", source="   ")]
     results = await run_ingestion(inputs, db_session)
 
     assert results[0].success is False
+    assert "source is required" in results[0].errors
     spy.assert_not_called()
 
 

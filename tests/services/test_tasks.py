@@ -91,8 +91,15 @@ async def test_mark_error_records_failure(db_session, task_engine) -> None:
 
 
 async def test_claim_pending_tasks_returns_in_creation_order(db_session, task_engine) -> None:
+    import asyncio
+
     service, _ = task_engine
     a = await service.enqueue(db_session, task_type="rank_lead", payload={"n": 1})
+    # Brief yield so the second insert lands in a distinct datetime.now() bucket
+    # on platforms with coarse clock resolution (Windows). Without this, the
+    # ORDER BY created_at falls back to the UUID id tiebreaker, producing a
+    # 50/50 random ordering.
+    await asyncio.sleep(0.005)
     b = await service.enqueue(db_session, task_type="rank_lead", payload={"n": 2})
     pending = await service.claim_pending_tasks(db_session, limit=10)
     assert [t.id for t in pending] == [a.id, b.id]
