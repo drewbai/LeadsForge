@@ -5,12 +5,12 @@ Revises: 0056_add_lead_ranking_fields
 Create Date: 2026-05-08 23:36:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision: str = "0057_add_task_table"
 down_revision: Union[str, None] = "0056_add_lead_ranking_fields"

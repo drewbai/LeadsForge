@@ -37,9 +37,7 @@ async def _load_lead(session: AsyncSession, lead_id: uuid.UUID) -> Lead | None:
     return result.scalar_one_or_none()
 
 
-async def _handle_enrich_lead(
-    session: AsyncSession, payload: dict[str, Any]
-) -> dict[str, Any]:
+async def _handle_enrich_lead(session: AsyncSession, payload: dict[str, Any]) -> dict[str, Any]:
     from app.services.enrichment_service import enrich_lead
 
     lead_id = _payload_lead_id(payload)
@@ -50,9 +48,7 @@ async def _handle_enrich_lead(
     return {"status": "ok", "lead_id": str(lead_id), "enriched": enriched}
 
 
-async def _handle_rank_lead(
-    session: AsyncSession, payload: dict[str, Any]
-) -> dict[str, Any]:
+async def _handle_rank_lead(session: AsyncSession, payload: dict[str, Any]) -> dict[str, Any]:
     from app.services.ranking.engine import compute_lead_ranking
 
     lead_id = _payload_lead_id(payload)
@@ -68,9 +64,7 @@ def _resolve_ai_provider():
     return OpenAIProvider()
 
 
-async def _handle_ai_summary(
-    session: AsyncSession, payload: dict[str, Any]
-) -> dict[str, Any]:
+async def _handle_ai_summary(session: AsyncSession, payload: dict[str, Any]) -> dict[str, Any]:
     from app.services.ai.summary_pipeline import generate_summary_for_lead
 
     lead_id = _payload_lead_id(payload)
@@ -81,9 +75,7 @@ async def _handle_ai_summary(
     return {"status": "ok", "summary": result}
 
 
-async def _handle_ai_insight(
-    session: AsyncSession, payload: dict[str, Any]
-) -> dict[str, Any]:
+async def _handle_ai_insight(session: AsyncSession, payload: dict[str, Any]) -> dict[str, Any]:
     from app.services.ai.insight_pipeline import generate_insights_for_lead
 
     lead_id = _payload_lead_id(payload)
@@ -94,9 +86,7 @@ async def _handle_ai_insight(
     return {"status": "ok", "insights": result, "count": len(result)}
 
 
-async def _handle_ai_embedding(
-    session: AsyncSession, payload: dict[str, Any]
-) -> dict[str, Any]:
+async def _handle_ai_embedding(session: AsyncSession, payload: dict[str, Any]) -> dict[str, Any]:
     from app.services.ai.embedding_pipeline import generate_embedding_for_lead
 
     lead_id = _payload_lead_id(payload)

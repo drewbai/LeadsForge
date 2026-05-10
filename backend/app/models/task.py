@@ -9,7 +9,6 @@ from sqlalchemy.types import TypeEngine
 
 from app.db.base import Base
 
-
 TASK_STATUS_PENDING = "pending"
 TASK_STATUS_RUNNING = "running"
 TASK_STATUS_SUCCESS = "success"

@@ -47,9 +47,7 @@ async def get_task(session: AsyncSession, task_id: uuid.UUID) -> Task | None:
 async def mark_running(session: AsyncSession, task_id: uuid.UUID) -> Task | None:
     now = datetime.now(timezone.utc)
     await session.execute(
-        update(Task)
-        .where(Task.id == task_id)
-        .values(status=TASK_STATUS_RUNNING, started_at=now, updated_at=now)
+        update(Task).where(Task.id == task_id).values(status=TASK_STATUS_RUNNING, started_at=now, updated_at=now)
     )
     await session.commit()
     return await get_task(session, task_id)

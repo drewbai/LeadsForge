@@ -33,10 +33,7 @@ async def enqueue_task(
     if task_type not in DISPATCH_TABLE:
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"Unknown task_type '{task_type}'. "
-                f"Known: {sorted(DISPATCH_TABLE.keys())}"
-            ),
+            detail=(f"Unknown task_type '{task_type}'. Known: {sorted(DISPATCH_TABLE.keys())}"),
         )
     if not isinstance(payload, dict):
         raise HTTPException(status_code=400, detail="payload must be a JSON object")
