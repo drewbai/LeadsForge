@@ -31,6 +31,10 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ.setdefault("ENV", "test")
 os.environ.setdefault("DEBUG", "false")
 os.environ.setdefault("APP_NAME", "LeadsForge-Test")
+# The background task worker (wired in app.main on startup) would otherwise
+# spawn during any test that triggers the FastAPI lifespan, racing fixtures
+# and consuming the test session pool. Force-disable it here.
+os.environ.setdefault("LEADSFORGE_DISABLE_TASK_WORKER", "1")
 
 import app.models.lead  # noqa: F401  ensure Lead is registered on Base.metadata
 import pytest
