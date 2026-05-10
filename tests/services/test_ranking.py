@@ -44,6 +44,26 @@ async def test_compute_lead_ranking_returns_none_for_missing_lead(db_session) ->
 
 
 @pytest.mark.asyncio
+async def test_compute_lead_ranking_enqueues_route_lead_task(
+    db_session,
+    seeded_lead,
+    monkeypatch,
+) -> None:
+    recorded: list = []
+
+    async def capture(lid) -> None:
+        recorded.append(lid)
+
+    monkeypatch.setattr(
+        "app.services.routing.triggers.enqueue_route_lead",
+        capture,
+    )
+
+    await ranking_engine.compute_lead_ranking(db_session, seeded_lead.id)
+    assert recorded == [seeded_lead.id]
+
+
+@pytest.mark.asyncio
 async def test_recompute_all_handles_empty_db(db_session) -> None:
     summary = await ranking_engine.recompute_ranking_for_all_leads(db_session)
     assert summary == {"total": 0, "success": 0, "failed": 0}

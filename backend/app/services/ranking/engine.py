@@ -219,6 +219,13 @@ async def compute_lead_ranking(
         {"lead_id": str(lead_id), "score_bucket": _score_bucket(final_score)},
     )
 
+    try:
+        from app.services.routing.triggers import enqueue_route_lead
+
+        await enqueue_route_lead(lead_id)
+    except Exception:
+        logger.exception("Failed to enqueue route_lead after ranking for lead %s", lead_id)
+
     return {
         "lead_id": str(lead_id),
         "ranking_score": final_score,
