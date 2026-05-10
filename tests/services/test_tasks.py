@@ -13,7 +13,6 @@ from uuid import UUID, uuid4
 import pytest
 import pytest_asyncio
 
-
 pytestmark = pytest.mark.asyncio
 
 
@@ -65,9 +64,7 @@ async def test_get_task_returns_none_when_missing(db_session, task_engine) -> No
     assert await service.get_task(db_session, uuid4()) is None
 
 
-async def test_mark_running_then_success_records_lifecycle(
-    db_session, task_engine
-) -> None:
+async def test_mark_running_then_success_records_lifecycle(db_session, task_engine) -> None:
     service, _ = task_engine
     created = await service.enqueue(db_session, task_type="rank_lead", payload={})
     running = await service.mark_running(db_session, created.id)
@@ -93,11 +90,16 @@ async def test_mark_error_records_failure(db_session, task_engine) -> None:
     assert errored.finished_at is not None
 
 
-async def test_claim_pending_tasks_returns_in_creation_order(
-    db_session, task_engine
-) -> None:
+async def test_claim_pending_tasks_returns_in_creation_order(db_session, task_engine) -> None:
+    import asyncio
+
     service, _ = task_engine
     a = await service.enqueue(db_session, task_type="rank_lead", payload={"n": 1})
+    # Brief yield so the second insert lands in a distinct datetime.now() bucket
+    # on platforms with coarse clock resolution (Windows). Without this, the
+    # ORDER BY created_at falls back to the UUID id tiebreaker, producing a
+    # 50/50 random ordering.
+    await asyncio.sleep(0.005)
     b = await service.enqueue(db_session, task_type="rank_lead", payload={"n": 2})
     pending = await service.claim_pending_tasks(db_session, limit=10)
     assert [t.id for t in pending] == [a.id, b.id]
@@ -112,9 +114,7 @@ async def test_dispatch_table_excludes_route_lead_until_phase_74(task_engine) ->
     assert expected.issubset(set(worker.DISPATCH_TABLE.keys()))
 
 
-async def test_execute_task_happy_path_calls_handler_and_marks_success(
-    db_session, task_engine
-) -> None:
+async def test_execute_task_happy_path_calls_handler_and_marks_success(db_session, task_engine) -> None:
     service, worker = task_engine
     lead_id = uuid4()
 
@@ -129,9 +129,7 @@ async def test_execute_task_happy_path_calls_handler_and_marks_success(
         "app.services.ranking.engine.compute_lead_ranking",
         new=AsyncMock(side_effect=fake_compute),
     ):
-        task = await service.enqueue(
-            db_session, task_type="rank_lead", payload={"lead_id": str(lead_id)}
-        )
+        task = await service.enqueue(db_session, task_type="rank_lead", payload={"lead_id": str(lead_id)})
         outcome = await worker.execute_task(db_session, task)
 
     assert outcome["status"] == "success"
@@ -152,9 +150,7 @@ async def test_execute_task_unknown_type_marks_error(db_session, task_engine) ->
     assert "Unknown task_type" in outcome["error"]
 
 
-async def test_execute_task_handler_exception_marks_error(
-    db_session, task_engine
-) -> None:
+async def test_execute_task_handler_exception_marks_error(db_session, task_engine) -> None:
     service, worker = task_engine
 
     async def boom(session, _lead_id):
