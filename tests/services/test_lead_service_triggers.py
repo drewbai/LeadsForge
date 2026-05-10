@@ -27,9 +27,7 @@ async def test_create_lead_enqueues_ranking_once(db_session, monkeypatch) -> Non
 
 
 @pytest.mark.asyncio
-async def test_update_lead_enqueues_ranking_once(
-    db_session, seeded_lead, monkeypatch
-) -> None:
+async def test_update_lead_enqueues_ranking_once(db_session, seeded_lead, monkeypatch) -> None:
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
 
@@ -62,9 +60,7 @@ async def test_update_lead_missing_does_not_enqueue(db_session, monkeypatch) -> 
 
 
 @pytest.mark.asyncio
-async def test_delete_lead_does_not_enqueue(
-    db_session, seeded_lead, monkeypatch
-) -> None:
+async def test_delete_lead_does_not_enqueue(db_session, seeded_lead, monkeypatch) -> None:
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
 

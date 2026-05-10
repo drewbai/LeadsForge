@@ -20,9 +20,7 @@ from app.services import lead_service
 
 
 @pytest.mark.asyncio
-async def test_ingestion_enqueues_exactly_once_per_lead(
-    db_session, monkeypatch
-) -> None:
+async def test_ingestion_enqueues_exactly_once_per_lead(db_session, monkeypatch) -> None:
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
 
@@ -35,9 +33,7 @@ async def test_ingestion_enqueues_exactly_once_per_lead(
 
 
 @pytest.mark.asyncio
-async def test_ingestion_failed_validation_does_not_enqueue(
-    db_session, monkeypatch
-) -> None:
+async def test_ingestion_failed_validation_does_not_enqueue(db_session, monkeypatch) -> None:
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
 
@@ -49,16 +45,11 @@ async def test_ingestion_failed_validation_does_not_enqueue(
 
 
 @pytest.mark.asyncio
-async def test_ingestion_three_leads_enqueues_three_tasks(
-    db_session, monkeypatch
-) -> None:
+async def test_ingestion_three_leads_enqueues_three_tasks(db_session, monkeypatch) -> None:
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
 
-    inputs = [
-        IngestionLeadInput(email=f"batch-{i}@example.com", source="signup")
-        for i in range(3)
-    ]
+    inputs = [IngestionLeadInput(email=f"batch-{i}@example.com", source="signup") for i in range(3)]
     results = await run_ingestion(inputs, db_session)
 
     assert all(r.success for r in results)

@@ -66,9 +66,7 @@ async def ranking_status(
     if "last_ranked_at" in leads.c:
         columns_to_select.append(leads.c.last_ranked_at)
 
-    result = await session.execute(
-        select(*columns_to_select).where(leads.c.id == lead_id)
-    )
+    result = await session.execute(select(*columns_to_select).where(leads.c.id == lead_id))
     row = result.mappings().first()
     if row is None:
         raise HTTPException(status_code=404, detail="Lead not found")
@@ -77,7 +75,5 @@ async def ranking_status(
     return {
         "lead_id": str(lead_id),
         "ranking_score": row.get("ranking_score"),
-        "last_ranked_at": (
-            last_ranked_at.isoformat() if last_ranked_at is not None else None
-        ),
+        "last_ranked_at": (last_ranked_at.isoformat() if last_ranked_at is not None else None),
     }

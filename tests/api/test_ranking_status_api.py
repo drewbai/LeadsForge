@@ -14,9 +14,7 @@ async def test_ranking_status_returns_404_for_missing_lead(client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_ranking_status_returns_payload_for_existing_lead(
-    client, seeded_lead
-) -> None:
+async def test_ranking_status_returns_payload_for_existing_lead(client, seeded_lead) -> None:
     response = await client.get(f"/api/v1/ranking/{seeded_lead.id}/status")
     assert response.status_code == 200
 
@@ -29,9 +27,7 @@ async def test_ranking_status_returns_payload_for_existing_lead(
 
 
 @pytest.mark.asyncio
-async def test_ranking_status_returns_persisted_score(
-    client, db_session, seeded_lead
-) -> None:
+async def test_ranking_status_returns_persisted_score(client, db_session, seeded_lead) -> None:
     from datetime import datetime, timezone
 
     seeded_lead.ranking_score = 87.5

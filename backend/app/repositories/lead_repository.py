@@ -28,9 +28,7 @@ async def select_all_leads(db: AsyncSession) -> list[Lead]:
     return list(result.scalars().all())
 
 
-async def update_lead(
-    db: AsyncSession, lead_id: UUID, lead_update: LeadCreate
-) -> Lead | None:
+async def update_lead(db: AsyncSession, lead_id: UUID, lead_update: LeadCreate) -> Lead | None:
     lead = await select_lead_by_id(db, lead_id)
     if lead is None:
         return None

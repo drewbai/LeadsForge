@@ -18,12 +18,8 @@ from sqlalchemy import select
 
 
 @pytest.mark.asyncio
-async def test_enqueue_ranking_recompute_persists_rank_lead_task(
-    db_session, session_factory, monkeypatch
-) -> None:
-    monkeypatch.setattr(
-        "app.db.engine.AsyncSessionLocal", session_factory, raising=False
-    )
+async def test_enqueue_ranking_recompute_persists_rank_lead_task(db_session, session_factory, monkeypatch) -> None:
+    monkeypatch.setattr("app.db.engine.AsyncSessionLocal", session_factory, raising=False)
 
     lead_id = uuid4()
     await enqueue_ranking_recompute(lead_id)
@@ -37,12 +33,8 @@ async def test_enqueue_ranking_recompute_persists_rank_lead_task(
 
 
 @pytest.mark.asyncio
-async def test_enqueue_ranking_recompute_noop_for_none_lead_id(
-    db_session, session_factory, monkeypatch
-) -> None:
-    monkeypatch.setattr(
-        "app.db.engine.AsyncSessionLocal", session_factory, raising=False
-    )
+async def test_enqueue_ranking_recompute_noop_for_none_lead_id(db_session, session_factory, monkeypatch) -> None:
+    monkeypatch.setattr("app.db.engine.AsyncSessionLocal", session_factory, raising=False)
 
     await enqueue_ranking_recompute(None)
 
@@ -59,17 +51,12 @@ async def test_enqueue_ranking_recompute_swallows_failures(monkeypatch, caplog) 
         async def __aexit__(self, *exc_info):
             return False
 
-    monkeypatch.setattr(
-        "app.db.engine.AsyncSessionLocal", lambda: _BoomSession(), raising=False
-    )
+    monkeypatch.setattr("app.db.engine.AsyncSessionLocal", lambda: _BoomSession(), raising=False)
 
     with caplog.at_level("ERROR", logger=ranking_triggers.__name__):
         await enqueue_ranking_recompute(uuid4())
 
-    assert any(
-        "Failed to enqueue rank_lead task" in record.getMessage()
-        for record in caplog.records
-    )
+    assert any("Failed to enqueue rank_lead task" in record.getMessage() for record in caplog.records)
 
 
 def test_ranking_task_type_constant_matches_dispatch_table() -> None:

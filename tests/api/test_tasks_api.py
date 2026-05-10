@@ -10,7 +10,6 @@ from uuid import uuid4
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 
@@ -88,9 +87,7 @@ async def test_enqueue_endpoint_rejects_non_object_payload(client) -> None:
 async def test_get_task_endpoint_returns_serialized_task(client, db_session) -> None:
     _skip_if_no_router()
     service = pytest.importorskip("app.services.tasks.service")
-    created = await service.enqueue(
-        db_session, task_type="rank_lead", payload={"lead_id": str(uuid4())}
-    )
+    created = await service.enqueue(db_session, task_type="rank_lead", payload={"lead_id": str(uuid4())})
     resp = await client.get(f"/api/v1/tasks/{created.id}")
     assert resp.status_code == 200
     body = resp.json()
