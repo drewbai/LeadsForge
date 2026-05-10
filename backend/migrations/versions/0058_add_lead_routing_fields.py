@@ -5,11 +5,11 @@ Revises: 0057_add_task_table
 Create Date: 2026-05-08 22:50:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-
 
 revision: str = "0058_add_lead_routing_fields"
 down_revision: Union[str, None] = "0057_add_task_table"

@@ -15,15 +15,11 @@ RANKING_HIGH_THRESHOLD: float = 75.0
 RANKING_LOW_THRESHOLD: float = 35.0
 
 
-HIGH_INTENT_INSIGHT_TYPES: frozenset[str] = frozenset(
-    {"next_best_action", "opportunity"}
-)
+HIGH_INTENT_INSIGHT_TYPES: frozenset[str] = frozenset({"next_best_action", "opportunity"})
 RISK_INSIGHT_TYPES: frozenset[str] = frozenset({"risk"})
 
 
-HIGH_VALUE_INDUSTRIES: frozenset[str] = frozenset(
-    {"saas", "fintech", "healthcare", "enterprise"}
-)
+HIGH_VALUE_INDUSTRIES: frozenset[str] = frozenset({"saas", "fintech", "healthcare", "enterprise"})
 HIGH_VALUE_COMPANY_SIZES: frozenset[str] = frozenset({"large", "enterprise"})
 
 
@@ -106,9 +102,7 @@ async def route_lead(
     insight_table = metadata.tables.get("lead_ai_insight")
     if insight_table is not None:
         insight_result = await session.execute(
-            select(insight_table.c.insight_type).where(
-                insight_table.c.lead_id == lead_id
-            )
+            select(insight_table.c.insight_type).where(insight_table.c.lead_id == lead_id)
         )
         insight_types = [row[0] for row in insight_result.all() if row[0]]
 
@@ -117,9 +111,7 @@ async def route_lead(
 
     industry = _normalize(lead_row.get("industry"))
     company_size = _normalize(lead_row.get("company_size"))
-    has_high_value_enrichment = (
-        industry in HIGH_VALUE_INDUSTRIES or company_size in HIGH_VALUE_COMPANY_SIZES
-    )
+    has_high_value_enrichment = industry in HIGH_VALUE_INDUSTRIES or company_size in HIGH_VALUE_COMPANY_SIZES
 
     bucket, notes = _classify(
         score,
@@ -140,9 +132,7 @@ async def route_lead(
         update_values["last_routed_at"] = now
 
     if update_values:
-        await session.execute(
-            update(leads).where(leads.c.id == lead_id).values(**update_values)
-        )
+        await session.execute(update(leads).where(leads.c.id == lead_id).values(**update_values))
         await session.commit()
 
     return {
@@ -159,5 +149,3 @@ async def route_lead(
             "company_size": company_size or None,
         },
     }
-
-

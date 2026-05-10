@@ -27,6 +27,11 @@ async def test_create_lead_persists_row(db_session) -> None:
             "enqueue_ranking_recompute",
             new_callable=AsyncMock,
         ) as ranking_hook,
+        patch.object(
+            lead_service,
+            "enqueue_routing_recompute",
+            new_callable=AsyncMock,
+        ) as routing_hook,
     ):
         lead = await lead_service.create_lead(db_session, payload)
 
@@ -40,6 +45,7 @@ async def test_create_lead_persists_row(db_session) -> None:
         assert kwargs.get("lead_id") == lead.id
 
     ranking_hook.assert_awaited_once_with(lead.id)
+    routing_hook.assert_awaited_once_with(lead.id)
 
     rows = (await db_session.execute(select(Lead))).scalars().all()
     assert len(rows) == 1

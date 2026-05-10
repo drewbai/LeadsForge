@@ -58,15 +58,25 @@ async def test_enqueue_endpoint_rejects_unknown_task_type(client) -> None:
     assert "Unknown task_type" in detail
 
 
-async def test_enqueue_endpoint_rejects_route_lead_until_phase_74(client) -> None:
+async def test_enqueue_endpoint_accepts_route_lead(client) -> None:
     _skip_if_no_router()
-    resp = await client.post(
-        "/api/v1/tasks/enqueue",
-        json={"task_type": "route_lead", "payload": {"lead_id": str(uuid4())}},
-    )
-    assert resp.status_code == 400
-    detail = resp.json()["detail"]
-    assert "route_lead" in detail or "Unknown" in detail
+
+    async def fake_route(session, lead_id):
+        return {"lead_id": str(lead_id), "assigned_to": "queue:default", "reason": "fallback"}
+
+    with patch(
+        "app.services.routing.engine.route_lead",
+        new=AsyncMock(side_effect=fake_route),
+    ):
+        resp = await client.post(
+            "/api/v1/tasks/enqueue",
+            json={"task_type": "route_lead", "payload": {"lead_id": str(uuid4())}},
+        )
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "task_id" in body
+    assert body["status"] == "pending"
 
 
 async def test_enqueue_endpoint_rejects_missing_task_type(client) -> None:

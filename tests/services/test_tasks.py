@@ -105,13 +105,43 @@ async def test_claim_pending_tasks_returns_in_creation_order(db_session, task_en
     assert [t.id for t in pending] == [a.id, b.id]
 
 
-async def test_dispatch_table_excludes_route_lead_until_phase_74(task_engine) -> None:
+async def test_dispatch_table_includes_route_lead(task_engine) -> None:
     _, worker = task_engine
-    assert "route_lead" not in worker.DISPATCH_TABLE, (
-        "route_lead handler must stay out of DISPATCH_TABLE until Phase 74 lands"
-    )
-    expected = {"enrich_lead", "rank_lead", "ai_summary", "ai_insight", "ai_embedding"}
+    expected = {
+        "enrich_lead",
+        "rank_lead",
+        "route_lead",
+        "ai_summary",
+        "ai_insight",
+        "ai_embedding",
+    }
     assert expected.issubset(set(worker.DISPATCH_TABLE.keys()))
+
+
+async def test_execute_route_lead_invokes_routing_engine(db_session, task_engine) -> None:
+    service, worker = task_engine
+    lead_id = uuid4()
+
+    async def fake_route(session, _lead_id):
+        return {"lead_id": str(_lead_id), "assigned_to": "queue:default", "reason": "fallback"}
+
+    with patch(
+        "app.services.routing.engine.route_lead",
+        new=AsyncMock(side_effect=fake_route),
+    ):
+        task = await service.enqueue(
+            db_session,
+            task_type="route_lead",
+            payload={"lead_id": str(lead_id)},
+        )
+        outcome = await worker.execute_task(db_session, task)
+
+    assert outcome["status"] == "success"
+    refreshed = await service.get_task(db_session, task.id)
+    assert refreshed is not None
+    assert refreshed.status == "success"
+    assert refreshed.result is not None
+    assert refreshed.result["routing"]["assigned_to"] == "queue:default"
 
 
 async def test_execute_task_happy_path_calls_handler_and_marks_success(db_session, task_engine) -> None:
