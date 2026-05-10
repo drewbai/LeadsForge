@@ -1,7 +1,7 @@
 """add task table
 
-Revision ID: 0059_add_task_table
-Revises: 0057_add_lead_routing_fields
+Revision ID: 0057_add_task_table
+Revises: 0056_add_lead_ranking_fields
 Create Date: 2026-05-08 23:36:00.000000
 
 """
@@ -12,8 +12,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 
-revision: str = "0059_add_task_table"
-down_revision: Union[str, None] = "0057_add_lead_routing_fields"
+revision: str = "0057_add_task_table"
+down_revision: Union[str, None] = "0056_add_lead_ranking_fields"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

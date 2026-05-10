@@ -2,9 +2,10 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, String, Text
+from sqlalchemy import JSON, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.types import TypeEngine
 
 from app.db.base import Base
 
@@ -25,6 +26,11 @@ VALID_TASK_STATUSES: frozenset[str] = frozenset(
 )
 
 
+# JSON on every dialect; JSONB only when the bind is PostgreSQL.
+# Keeps SQLite (used by the CI test harness) happy without losing JSONB in prod.
+_JSON_PORTABLE: TypeEngine = JSON().with_variant(JSONB(), "postgresql")
+
+
 class Task(Base):
     __tablename__ = "task"
 
@@ -37,11 +43,11 @@ class Task(Base):
         index=True,
     )
     payload: Mapped[dict[str, Any]] = mapped_column(
-        JSONB,
+        _JSON_PORTABLE,
         nullable=False,
         default=dict,
     )
-    result: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    result: Mapped[dict[str, Any] | None] = mapped_column(_JSON_PORTABLE, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
