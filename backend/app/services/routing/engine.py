@@ -17,6 +17,22 @@ HIGH_VALUE_THRESHOLD = 90.0
 MEDIUM_VALUE_THRESHOLD = 70.0
 
 
+async def _record_routed_event(session: AsyncSession, lead_id: UUID, decision: dict[str, Any]) -> None:
+    try:
+        from app.services.events.activity import record_activity_event
+
+        payload = {k: v for k, v in decision.items() if k != "lead_id"}
+        await record_activity_event(
+            session=session,
+            lead_id=lead_id,
+            event_type="lead.routed",
+            payload=payload,
+            performed_by="routing_engine",
+        )
+    except Exception:
+        logger.exception("Failed to record lead.routed for lead %s", lead_id)
+
+
 async def route_lead(session: AsyncSession, lead_id: UUID) -> dict[str, Any] | None:
     """Assign a synthetic queue label from ranking score; no ORM columns required."""
     result = await session.execute(select(Lead).where(Lead.id == lead_id))
@@ -25,29 +41,46 @@ async def route_lead(session: AsyncSession, lead_id: UUID) -> dict[str, Any] | N
         return None
 
     score = lead.ranking_score
+    decision: dict[str, Any]
     if score is None:
-        return {
+        decision = {
             "lead_id": str(lead_id),
             "routing_reason": "awaiting_rank",
             "assigned_to": None,
         }
-    if score >= HIGH_VALUE_THRESHOLD:
+    elif score >= HIGH_VALUE_THRESHOLD:
         bucket = "tier1_sdr"
         reason = "high_value"
+        logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": reason,
+            "assigned_to": bucket,
+            "ranking_score": score,
+        }
     elif score >= MEDIUM_VALUE_THRESHOLD:
         bucket = "tier2_sdr"
         reason = "medium_value"
+        logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": reason,
+            "assigned_to": bucket,
+            "ranking_score": score,
+        }
     else:
         bucket = "nurture_pool"
         reason = "standard"
+        logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": reason,
+            "assigned_to": bucket,
+            "ranking_score": score,
+        }
 
-    logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
-    return {
-        "lead_id": str(lead_id),
-        "routing_reason": reason,
-        "assigned_to": bucket,
-        "ranking_score": score,
-    }
+    await _record_routed_event(session, lead_id, decision)
+    return decision
 
 
 async def trigger_routing(lead_id: UUID) -> None:
