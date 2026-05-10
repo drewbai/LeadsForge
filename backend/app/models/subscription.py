@@ -36,7 +36,5 @@ def serialize_subscription(subscription: Subscription) -> dict[str, Any]:
         "target_type": subscription.target_type,
         "target": subscription.target,
         "is_active": subscription.is_active,
-        "created_at": (
-            subscription.created_at.isoformat() if subscription.created_at else None
-        ),
+        "created_at": (subscription.created_at.isoformat() if subscription.created_at else None),
     }

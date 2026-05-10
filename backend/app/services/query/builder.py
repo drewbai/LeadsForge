@@ -48,12 +48,7 @@ def apply_tag_filter(query: Select, tags: Iterable[str] | None) -> Select:
 
     subq = (
         select(literal_column("ltl.lead_id"))
-        .select_from(
-            text(
-                "lead_tag_link AS ltl "
-                "JOIN leadtag AS lt ON lt.id = ltl.tag_id"
-            )
-        )
+        .select_from(text("lead_tag_link AS ltl JOIN leadtag AS lt ON lt.id = ltl.tag_id"))
         .where(literal_column("lt.name").in_(cleaned))
     )
     return query.where(Lead.id.in_(subq))

@@ -121,9 +121,7 @@ async def get_metrics(
     total = int(total_result.scalar() or 0)
 
     page_result = await session.execute(
-        query.order_by(Metric.created_at.desc(), Metric.id.desc())
-        .limit(safe_limit)
-        .offset(safe_offset)
+        query.order_by(Metric.created_at.desc(), Metric.id.desc()).limit(safe_limit).offset(safe_offset)
     )
     metrics = [serialize_metric(m) for m in page_result.scalars().all()]
 

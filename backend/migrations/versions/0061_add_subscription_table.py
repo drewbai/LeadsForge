@@ -5,6 +5,7 @@ Revises: 0057_add_task_table
 Create Date: 2026-05-08 23:55:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

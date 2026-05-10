@@ -21,9 +21,7 @@ class SubscriptionValidationError(ValueError):
 
 def _validate_target_type(target_type: str) -> None:
     if target_type not in VALID_TARGET_TYPES:
-        raise SubscriptionValidationError(
-            f"target_type must be one of {VALID_TARGET_TYPES}, got '{target_type}'"
-        )
+        raise SubscriptionValidationError(f"target_type must be one of {VALID_TARGET_TYPES}, got '{target_type}'")
 
 
 async def create_subscription(
@@ -84,11 +82,7 @@ async def get_active_subscriptions_for_event(
     session: AsyncSession,
     event_type: str,
 ) -> list[Subscription]:
-    stmt = (
-        select(Subscription)
-        .where(Subscription.event_type == event_type)
-        .where(Subscription.is_active.is_(True))
-    )
+    stmt = select(Subscription).where(Subscription.event_type == event_type).where(Subscription.is_active.is_(True))
     result = await session.execute(stmt)
     return list(result.scalars().all())
 
@@ -98,12 +92,7 @@ async def deactivate_subscription(
     subscription_id: UUID | str,
 ) -> dict[str, Any] | None:
     sid = UUID(str(subscription_id)) if not isinstance(subscription_id, UUID) else subscription_id
-    stmt = (
-        update(Subscription)
-        .where(Subscription.id == sid)
-        .values(is_active=False)
-        .returning(Subscription)
-    )
+    stmt = update(Subscription).where(Subscription.id == sid).values(is_active=False).returning(Subscription)
     result = await session.execute(stmt)
     row = result.scalar_one_or_none()
     if row is None:

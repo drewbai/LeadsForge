@@ -28,9 +28,7 @@ async def record_activity_event(
     """
     payload = payload or {}
     metadata = MetaData()
-    await session.run_sync(
-        lambda sync_session: metadata.reflect(bind=sync_session.bind)
-    )
+    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
     activity_table = metadata.tables.get("lead_activity_log")
 
     event_id = uuid4()

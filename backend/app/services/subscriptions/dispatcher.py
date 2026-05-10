@@ -57,9 +57,7 @@ async def _record_failure_activity(
         from sqlalchemy import MetaData, insert
 
         metadata = MetaData()
-        await session.run_sync(
-            lambda sync_session: metadata.reflect(bind=sync_session.bind)
-        )
+        await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
         activity_table = metadata.tables.get("lead_activity_log")
         if activity_table is None:
             return
@@ -113,9 +111,7 @@ async def _dispatch_internal(
 ) -> None:
     handler = _INTERNAL_HANDLERS.get(subscription.target)
     if handler is None:
-        raise RuntimeError(
-            f"No internal handler registered for '{subscription.target}'"
-        )
+        raise RuntimeError(f"No internal handler registered for '{subscription.target}'")
     await handler(event_type, payload)
 
 
@@ -167,10 +163,7 @@ async def dispatch_event(
         }
 
     results = await asyncio.gather(
-        *[
-            _dispatch_to_subscription(session, sub, event_type, payload)
-            for sub in subscriptions
-        ],
+        *[_dispatch_to_subscription(session, sub, event_type, payload) for sub in subscriptions],
         return_exceptions=False,
     )
     dispatched = sum(1 for r in results if r)
@@ -202,9 +195,7 @@ async def _run_dispatch(event_type: str, payload: dict[str, Any]) -> None:
         async with AsyncSessionLocal() as session:
             await dispatch_event(session, event_type, payload)
     except Exception:
-        logger.exception(
-            "Background dispatch failed for event_type=%s", event_type
-        )
+        logger.exception("Background dispatch failed for event_type=%s", event_type)
 
 
 def fire_and_forget_dispatch(event_type: str, payload: dict[str, Any]) -> None:

@@ -5,6 +5,7 @@ Revises: 0061_add_subscription_table
 Create Date: 2026-05-08 23:43:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -49,9 +50,7 @@ def upgrade() -> None:
         ["metric_type", "created_at"],
         unique=False,
     )
-    op.execute(
-        "CREATE INDEX ix_metric_labels_gin ON metric USING gin (labels);"
-    )
+    op.execute("CREATE INDEX ix_metric_labels_gin ON metric USING gin (labels);")
 
 
 def downgrade() -> None:
