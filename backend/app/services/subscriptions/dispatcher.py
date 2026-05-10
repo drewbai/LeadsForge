@@ -35,7 +35,7 @@ async def _record_failure_metric(event_type: str, target_type: str) -> None:
     try:
         from app.services.metrics.service import fire_and_forget_increment
 
-        fire_and_forget_increment(
+        await fire_and_forget_increment(
             "subscription_dispatch_failed",
             labels={"event_type": event_type, "target_type": target_type},
         )

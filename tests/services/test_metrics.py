@@ -16,8 +16,9 @@ async def test_increment_records_metric(db_session) -> None:
     get_metrics = getattr(service, "get_metrics", None)
     if get_metrics is None:
         pytest.skip("get_metrics not exposed")
-    rows = await get_metrics(db_session, metric_type="lead_created")
-    assert rows, "expected at least one metric row"
+    payload = await get_metrics(db_session, metric_type="lead_created")
+    assert payload["total"] >= 1
+    assert payload["results"], "expected at least one metric row"
 
 
 @pytest.mark.asyncio
@@ -40,11 +41,7 @@ async def test_get_metrics_filters_by_type(db_session) -> None:
     await increment(db_session, "lead_enriched")
     only_created = await get_metrics(db_session, metric_type="lead_created")
     only_enriched = await get_metrics(db_session, metric_type="lead_enriched")
-    assert all(
-        (r.get("metric_type") if isinstance(r, dict) else getattr(r, "metric_type")) == "lead_created"
-        for r in only_created
-    )
-    assert all(
-        (r.get("metric_type") if isinstance(r, dict) else getattr(r, "metric_type")) == "lead_enriched"
-        for r in only_enriched
-    )
+    created_rows = only_created["results"]
+    enriched_rows = only_enriched["results"]
+    assert all(r["metric_type"] == "lead_created" for r in created_rows)
+    assert all(r["metric_type"] == "lead_enriched" for r in enriched_rows)

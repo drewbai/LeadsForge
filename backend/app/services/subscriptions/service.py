@@ -95,11 +95,12 @@ async def get_active_subscriptions_for_event(
 
 async def deactivate_subscription(
     session: AsyncSession,
-    subscription_id: UUID,
+    subscription_id: UUID | str,
 ) -> dict[str, Any] | None:
+    sid = UUID(str(subscription_id)) if not isinstance(subscription_id, UUID) else subscription_id
     stmt = (
         update(Subscription)
-        .where(Subscription.id == subscription_id)
+        .where(Subscription.id == sid)
         .values(is_active=False)
         .returning(Subscription)
     )
@@ -109,5 +110,5 @@ async def deactivate_subscription(
         await session.commit()
         return None
     await session.commit()
-    logger.info("Deactivated subscription %s", subscription_id)
+    logger.info("Deactivated subscription %s", sid)
     return serialize_subscription(row)
