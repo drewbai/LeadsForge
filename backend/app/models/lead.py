@@ -25,6 +25,13 @@ class Lead(Base):
         DateTime(timezone=True),
         nullable=True,
     )
+    assigned_to: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    routing_reason: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    last_routed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
 
 
 def serialize_lead(lead: Lead) -> dict[str, Any]:
@@ -36,4 +43,7 @@ def serialize_lead(lead: Lead) -> dict[str, Any]:
         "ranking_score": lead.ranking_score,
         "ranking_explanation": lead.ranking_explanation,
         "last_ranked_at": (lead.last_ranked_at.isoformat() if lead.last_ranked_at else None),
+        "assigned_to": lead.assigned_to,
+        "routing_reason": lead.routing_reason,
+        "last_routed_at": (lead.last_routed_at.isoformat() if lead.last_routed_at else None),
     }

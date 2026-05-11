@@ -16,3 +16,9 @@ class LeadRead(BaseModel):
     email: EmailStr
     source: str
     created_at: datetime
+    ranking_score: float | None = None
+    ranking_explanation: str | None = None
+    last_ranked_at: datetime | None = None
+    assigned_to: str | None = None
+    routing_reason: str | None = None
+    last_routed_at: datetime | None = None

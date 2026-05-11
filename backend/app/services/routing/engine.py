@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import AsyncSessionLocal
 from app.models.lead import Lead
+from app.models.metric import METRIC_LEAD_ROUTED
+from app.services.metrics.service import fire_and_forget_increment
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +37,7 @@ async def _record_routed_event(session: AsyncSession, lead_id: UUID, decision: d
 
 
 async def route_lead(session: AsyncSession, lead_id: UUID) -> dict[str, Any] | None:
-    """Assign a synthetic queue label from ranking score; no ORM columns required."""
+    """Compute a routing decision, persist queue fields on ``Lead``, activity, and metrics."""
     result = await session.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if lead is None:
@@ -78,6 +81,21 @@ async def route_lead(session: AsyncSession, lead_id: UUID) -> dict[str, Any] | N
             "assigned_to": bucket,
             "ranking_score": score,
         }
+
+    now = datetime.now(timezone.utc)
+    lead.assigned_to = decision.get("assigned_to")
+    lead.routing_reason = str(decision["routing_reason"])
+    lead.last_routed_at = now
+    await session.commit()
+
+    await fire_and_forget_increment(
+        METRIC_LEAD_ROUTED,
+        {
+            "lead_id": str(lead_id),
+            "routing_reason": str(decision["routing_reason"]),
+            "assigned_to": decision.get("assigned_to") or "",
+        },
+    )
 
     await _record_routed_event(session, lead_id, decision)
     return decision

@@ -65,6 +65,17 @@ async def test_search_leads_pagination(db_session) -> None:
     assert emails_p1.isdisjoint(emails_p2)
 
 
+async def test_search_leads_assigned_to_filter(db_session) -> None:
+    await create_lead(db_session, email="q1@example.com", source="s", assigned_to="tier1_sdr")
+    await create_lead(db_session, email="q2@example.com", source="s", assigned_to="tier2_sdr")
+
+    out = await search_leads(db_session, assigned_to="tier1_sdr")
+
+    assert out["total"] == 1
+    assert out["results"][0]["email"] == "q1@example.com"
+    assert out["results"][0]["assigned_to"] == "tier1_sdr"
+
+
 async def test_search_leads_includes_filters_echo(db_session) -> None:
     await create_lead(db_session)
     out = await search_leads(db_session, text="  zzz  ", source=None, min_score=1.0, limit=10, offset=3)

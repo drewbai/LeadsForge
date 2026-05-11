@@ -11,6 +11,8 @@ SORT_FIELD_MAP: dict[str, Any] = {
     "created_at": Lead.created_at,
     "ranking_score": Lead.ranking_score,
     "last_ranked_at": Lead.last_ranked_at,
+    "last_routed_at": Lead.last_routed_at,
+    "assigned_to": Lead.assigned_to,
     "email": Lead.email,
     "source": Lead.source,
     "id": Lead.id,
