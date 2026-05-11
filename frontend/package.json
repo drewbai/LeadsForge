@@ -15,6 +15,7 @@
   "dependencies": {
     "react": "*",
     "react-dom": "*",
+    "react-router-dom": "^7.6.0",
     "vite": "*"
   },
   "devDependencies": {
