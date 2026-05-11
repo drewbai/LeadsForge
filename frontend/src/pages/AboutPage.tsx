@@ -65,6 +65,10 @@ export default function AboutPage() {
       </AboutCard>
 
       <AboutCard title="Versions">
+        <p className="muted aboutTightTop">
+          UI Phase 3: lead list uses <span className="mono">GET /api/v1/leads/search</span> (debounced text +
+          source filter).
+        </p>
         {kvRow("Frontend (package.json)", __LF_FRONTEND_PKG_VERSION__)}
         {kvRow(
           "Backend (pyproject.toml · Poetry)",
