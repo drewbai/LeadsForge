@@ -76,6 +76,11 @@ button:disabled {
   justify-content: space-between;
 }
 
+.pageTitle {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
 .kv {
   display: grid;
   grid-template-columns: 140px 1fr;
