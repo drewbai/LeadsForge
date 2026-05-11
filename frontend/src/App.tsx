@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import AppLayout from "./layouts/AppLayout";
 import LeadsLayout from "./layouts/LeadsLayout";
+import AboutPage from "./pages/AboutPage";
 import HomePage from "./pages/HomePage";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import LeadsDetailPage from "./pages/leads/LeadsDetailPage";
@@ -35,6 +36,7 @@ export default function App() {
             <PlaceholderPage title="Settings" phase={7} description="Settings and admin (UI Phase 7)." />
           }
         />
+        <Route path="about" element={<AboutPage />} />
         <Route element={<LeadsLayout />}>
           <Route path="leads" element={<LeadsListPage />} />
           <Route path="leads/new" element={<LeadsNewPage />} />
