@@ -1,9 +1,4 @@
-"""Deterministic tests for the Phase 77 background task engine.
-
-Grounded in app/services/tasks/{service.py,worker.py} and app/models/task.py.
-Skips entire file if the `task` table or service module is absent on the
-current branch (so dev keeps passing until Phase 77 merges).
-"""
+"""Deterministic tests for the background task engine (Phase 77 + Phase 81 routing)."""
 
 from __future__ import annotations
 
@@ -11,22 +6,15 @@ from unittest.mock import AsyncMock, patch
 from uuid import UUID, uuid4
 
 import pytest
-import pytest_asyncio
+from app.services.tasks import service as task_service
+from app.services.tasks import worker as task_worker
 
 pytestmark = pytest.mark.asyncio
 
 
-def _require_task_engine():
-    pytest.importorskip("app.models.task")
-    return (
-        pytest.importorskip("app.services.tasks.service"),
-        pytest.importorskip("app.services.tasks.worker"),
-    )
-
-
-@pytest_asyncio.fixture
-async def task_engine():
-    return _require_task_engine()
+@pytest.fixture
+def task_engine():
+    return task_service, task_worker
 
 
 async def test_enqueue_creates_pending_row(db_session, task_engine) -> None:
@@ -115,7 +103,37 @@ async def test_dispatch_table_includes_route_lead(task_engine) -> None:
         "ai_insight",
         "ai_embedding",
     }
-    assert expected.issubset(set(worker.DISPATCH_TABLE.keys()))
+    assert set(worker.DISPATCH_TABLE.keys()) == expected
+
+
+async def test_execute_task_route_lead_skips_missing_lead(db_session, task_engine) -> None:
+    service, worker = task_engine
+    task = await service.enqueue(
+        db_session,
+        task_type="route_lead",
+        payload={"lead_id": str(uuid4())},
+    )
+    outcome = await worker.execute_task(db_session, task)
+    assert outcome["status"] == "success"
+    assert outcome["result"]["status"] == "skipped"
+
+
+async def test_execute_task_route_lead_returns_decision(db_session, task_engine, seeded_lead) -> None:
+    service, worker = task_engine
+    seeded_lead.ranking_score = 88.0
+    db_session.add(seeded_lead)
+    await db_session.commit()
+    task = await service.enqueue(
+        db_session,
+        task_type="route_lead",
+        payload={"lead_id": str(seeded_lead.id)},
+    )
+    outcome = await worker.execute_task(db_session, task)
+    assert outcome["status"] == "success"
+    assert outcome["result"]["routing"]["assigned_to"] == "tier2_sdr"
+    await db_session.refresh(seeded_lead)
+    assert seeded_lead.assigned_to == "tier2_sdr"
+    assert seeded_lead.routing_reason == "medium_value"
 
 
 async def test_execute_route_lead_invokes_routing_engine(db_session, task_engine) -> None:

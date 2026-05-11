@@ -1,5 +1,5 @@
 from collections.abc import AsyncIterator
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ class CsvIngestionRequest(BaseModel):
 
 
 class ManualIngestionRequest(BaseModel):
-    leads: list[dict]
+    leads: list[dict[str, Any]]
 
 
 async def get_db() -> AsyncIterator[AsyncSession]:

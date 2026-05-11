@@ -25,11 +25,12 @@ class Lead(Base):
         DateTime(timezone=True),
         nullable=True,
     )
-    assigned_to: Mapped[str | None] = mapped_column(String, nullable=True)
-    routing_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    assigned_to: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    routing_reason: Mapped[str | None] = mapped_column(String(256), nullable=True)
     last_routed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
+        index=True,
     )
 
 

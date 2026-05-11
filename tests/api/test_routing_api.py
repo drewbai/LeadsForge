@@ -1,50 +1,60 @@
-"""API tests for /api/v1/routing/{lead_id}/compute (Phase 74).
-
-The compute endpoint is intentionally synchronous (an explicit "route now"
-action), so it must invoke route_lead immediately and return its result.
-404 is returned for unknown leads.
-"""
+"""API tests for /api/v1/routing (Phase 84)."""
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-from app.services.routing.engine import RANKING_HIGH_THRESHOLD
-
-pytestmark = pytest.mark.asyncio
 
 
-async def test_compute_routing_returns_assignment_for_known_lead(client, seeded_lead, db_session):
-    seeded_lead.ranking_score = RANKING_HIGH_THRESHOLD + 5.0
+@pytest.mark.asyncio
+async def test_post_route_returns_routing_decision(client, db_session, seeded_lead, monkeypatch) -> None:
+    monkeypatch.setattr("app.services.routing.engine.fire_and_forget_increment", AsyncMock())
+
+    seeded_lead.ranking_score = 91.0
     db_session.add(seeded_lead)
     await db_session.commit()
 
-    resp = await client.post(f"/api/v1/routing/{seeded_lead.id}/compute")
-    assert resp.status_code == 200, resp.text
+    with patch("app.services.events.activity.record_activity_event", new=AsyncMock()):
+        resp = await client.post(f"/api/v1/routing/{seeded_lead.id}/route")
 
+    assert resp.status_code == 200
     body = resp.json()
     assert body["lead_id"] == str(seeded_lead.id)
-    assert body["assigned_to"] == "priority"
-    assert body["reason"]
-    assert body["last_routed_at"]
+    assert body["routing"]["assigned_to"] == "tier1_sdr"
+    assert body["routing"]["routing_reason"] == "high_value"
 
 
-async def test_compute_routing_unknown_lead_returns_404(client) -> None:
-    resp = await client.post(f"/api/v1/routing/{uuid4()}/compute")
+@pytest.mark.asyncio
+async def test_post_route_404_for_unknown_lead(client) -> None:
+    rid = uuid4()
+    resp = await client.post(f"/api/v1/routing/{rid}/route")
     assert resp.status_code == 404
-    assert resp.json()["detail"] == "Lead not found"
 
 
-async def test_compute_routing_persists_columns(client, seeded_lead, db_session) -> None:
-    seeded_lead.ranking_score = 10.0
+@pytest.mark.asyncio
+async def test_get_routing_status_reflects_db(client, db_session, seeded_lead, monkeypatch) -> None:
+    monkeypatch.setattr("app.services.routing.engine.fire_and_forget_increment", AsyncMock())
+
+    seeded_lead.ranking_score = 55.0
     db_session.add(seeded_lead)
     await db_session.commit()
 
-    resp = await client.post(f"/api/v1/routing/{seeded_lead.id}/compute")
-    assert resp.status_code == 200
+    with patch("app.services.events.activity.record_activity_event", new=AsyncMock()):
+        post = await client.post(f"/api/v1/routing/{seeded_lead.id}/route")
+    assert post.status_code == 200
 
-    await db_session.refresh(seeded_lead)
-    assert seeded_lead.assigned_to == "nurture"
-    assert seeded_lead.routing_reason
-    assert seeded_lead.last_routed_at is not None
+    resp = await client.get(f"/api/v1/routing/{seeded_lead.id}/status")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["assigned_to"] == "nurture_pool"
+    assert body["routing_reason"] == "standard"
+    assert body["ranking_score"] == 55.0
+    assert body["last_routed_at"] is not None
+
+
+@pytest.mark.asyncio
+async def test_get_routing_status_404_for_unknown_lead(client) -> None:
+    resp = await client.get(f"/api/v1/routing/{uuid4()}/status")
+    assert resp.status_code == 404

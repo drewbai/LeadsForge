@@ -5,8 +5,11 @@ import os
 from fastapi import FastAPI
 
 from app.api.v1.health_router import router as v1_health_router
+from app.api.v1.metrics_router import router as metrics_router
+from app.api.v1.query_router import router as query_router
 from app.api.v1.ranking_router import router as ranking_router
-from app.api.v1.routing_router import router as routing_router
+from app.api.v1.routing_router import router as routing_http_router
+from app.api.v1.subscription_router import router as subscription_router
 from app.api.v1.task_router import router as task_router
 from app.routers.enrichment import router as enrichment_router
 from app.routers.health import router as health_router
@@ -27,8 +30,11 @@ app.include_router(enrichment_router)
 app.include_router(scoring_router)
 app.include_router(ai_router)
 app.include_router(ranking_router)
-app.include_router(routing_router)
+app.include_router(routing_http_router)
+app.include_router(query_router)
 app.include_router(task_router)
+app.include_router(subscription_router)
+app.include_router(metrics_router)
 app.include_router(v1_health_router)
 
 
@@ -47,7 +53,8 @@ def _task_worker_disabled() -> bool:
 async def _startup_log_pipelines() -> None:
     logger.info(
         "LeadsForge backend %s — pipelines available: summary, insights, "
-        "embeddings, semantic_search, hybrid_search, ranking, routing, tasks, health",
+        "embeddings, semantic_search, hybrid_search, ranking, routing, query, tasks, "
+        "subscriptions, metrics, health",
         VERSION,
     )
 

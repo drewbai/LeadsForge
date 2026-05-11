@@ -8,14 +8,8 @@ logger = logging.getLogger(__name__)
 ROUTING_TASK_TYPE = "route_lead"
 
 
-async def enqueue_routing_recompute(lead_id: UUID | None) -> None:
-    """Enqueue a ``route_lead`` task for the given lead via the canonical task engine.
-
-    Symmetric with ``app.services.ranking.triggers.enqueue_ranking_recompute``:
-    same defensive contract (no-op for None, swallow exceptions, log failures),
-    same persistence semantics (writes a Task row that survives restarts and is
-    visible at GET /api/v1/tasks/{id}).
-    """
+async def enqueue_route_lead(lead_id: UUID | None) -> None:
+    """Enqueue a ``route_lead`` task (Phase 82 — after ranking or manual re-route)."""
     if lead_id is None:
         return
     try:

@@ -27,7 +27,7 @@ VALID_TASK_STATUSES: frozenset[str] = frozenset(
 
 # JSON on every dialect; JSONB only when the bind is PostgreSQL.
 # Keeps SQLite (used by the CI test harness) happy without losing JSONB in prod.
-_JSON_PORTABLE: TypeEngine = JSON().with_variant(JSONB(), "postgresql")
+_JSON_PORTABLE: TypeEngine[Any] = JSON().with_variant(JSONB(), "postgresql")
 
 
 class Task(Base):

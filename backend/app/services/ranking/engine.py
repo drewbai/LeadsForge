@@ -8,7 +8,10 @@ from typing import Any
 from sqlalchemy import MetaData, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.sync_reflection import reflect_bind
 from app.models.lead import Lead
+from app.models.metric import METRIC_LEAD_RANKED
+from app.services.metrics.service import fire_and_forget_increment
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +39,14 @@ INSIGHT_TYPE_WEIGHTS: dict[str, float] = {
     "sentiment": 0.4,
     "risk": -0.5,
 }
+
+
+def _score_bucket(score: float) -> str:
+    if score >= 75.0:
+        return "high"
+    if score >= 35.0:
+        return "mid"
+    return "low"
 
 
 def _clamp01(value: float) -> float:
@@ -163,7 +174,7 @@ async def compute_lead_ranking(
         lead_id = uuid.UUID(lead_id)
 
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")
@@ -203,6 +214,18 @@ async def compute_lead_ranking(
     lead_record.last_ranked_at = now
     await session.commit()
 
+    await fire_and_forget_increment(
+        METRIC_LEAD_RANKED,
+        {"lead_id": str(lead_id), "score_bucket": _score_bucket(final_score)},
+    )
+
+    try:
+        from app.services.routing.triggers import enqueue_route_lead
+
+        await enqueue_route_lead(lead_id)
+    except Exception:
+        logger.exception("Failed to enqueue route_lead after ranking for lead %s", lead_id)
+
     return {
         "lead_id": str(lead_id),
         "ranking_score": final_score,
@@ -224,7 +247,7 @@ async def recompute_ranking_for_all_leads(
     session: AsyncSession,
 ) -> dict[str, Any]:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     leads = metadata.tables.get("leads")
     if leads is None:
         raise RuntimeError("leads table not found")

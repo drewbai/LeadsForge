@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.lead import Lead, serialize_lead
 from app.models.task import Task
+from app.services.ai.base import AIProvider
 from app.services.tasks.service import (
     claim_pending_tasks,
     mark_error,
@@ -62,13 +63,13 @@ async def _handle_route_lead(session: AsyncSession, payload: dict[str, Any]) -> 
     from app.services.routing.engine import route_lead
 
     lead_id = _payload_lead_id(payload)
-    result = await route_lead(session, lead_id)
-    if result is None:
+    decision = await route_lead(session, lead_id)
+    if decision is None:
         return {"status": "skipped", "reason": "lead not found", "lead_id": str(lead_id)}
-    return {"status": "ok", "routing": result}
+    return {"status": "ok", "routing": decision}
 
 
-def _resolve_ai_provider():
+def _resolve_ai_provider() -> AIProvider:
     from app.services.ai.openai_provider import OpenAIProvider
 
     return OpenAIProvider()

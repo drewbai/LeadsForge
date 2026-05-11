@@ -1,151 +1,107 @@
 from __future__ import annotations
 
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Any
+from uuid import UUID
 
-from sqlalchemy import MetaData, select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.engine import AsyncSessionLocal
+from app.models.lead import Lead
+from app.models.metric import METRIC_LEAD_ROUTED
+from app.services.metrics.service import fire_and_forget_increment
 
 logger = logging.getLogger(__name__)
 
-
-RANKING_HIGH_THRESHOLD: float = 75.0
-RANKING_LOW_THRESHOLD: float = 35.0
-
-
-HIGH_INTENT_INSIGHT_TYPES: frozenset[str] = frozenset({"next_best_action", "opportunity"})
-RISK_INSIGHT_TYPES: frozenset[str] = frozenset({"risk"})
+# Score thresholds for simple rules-based routing (Phase 81).
+HIGH_VALUE_THRESHOLD = 90.0
+MEDIUM_VALUE_THRESHOLD = 70.0
 
 
-HIGH_VALUE_INDUSTRIES: frozenset[str] = frozenset({"saas", "fintech", "healthcare", "enterprise"})
-HIGH_VALUE_COMPANY_SIZES: frozenset[str] = frozenset({"large", "enterprise"})
-
-
-def _to_float(value: Any) -> float:
+async def _record_routed_event(session: AsyncSession, lead_id: UUID, decision: dict[str, Any]) -> None:
     try:
-        return float(value)
-    except (TypeError, ValueError):
-        return 0.0
+        from app.services.events.activity import record_activity_event
+
+        payload = {k: v for k, v in decision.items() if k != "lead_id"}
+        await record_activity_event(
+            session=session,
+            lead_id=lead_id,
+            event_type="lead.routed",
+            payload=payload,
+            performed_by="routing_engine",
+        )
+    except Exception:
+        logger.exception("Failed to record lead.routed for lead %s", lead_id)
 
 
-def _normalize(value: Any) -> str:
-    if value is None:
-        return ""
-    return str(value).strip().lower()
-
-
-def _classify(
-    score: float,
-    *,
-    has_high_intent: bool,
-    has_risk: bool,
-    has_high_value_enrichment: bool,
-) -> tuple[str, list[str]]:
-    notes: list[str] = []
-
-    if score >= RANKING_HIGH_THRESHOLD and has_high_intent:
-        bucket = "priority"
-        notes.append(f"high score ({score:.1f}) + high-intent insight")
-    elif score >= RANKING_HIGH_THRESHOLD:
-        bucket = "priority"
-        notes.append(f"high score ({score:.1f})")
-    elif score >= RANKING_LOW_THRESHOLD and has_high_intent:
-        bucket = "priority"
-        notes.append(f"mid score ({score:.1f}) elevated by high-intent insight")
-    elif score >= RANKING_LOW_THRESHOLD:
-        bucket = "standard"
-        notes.append(f"mid score ({score:.1f})")
-    else:
-        bucket = "nurture"
-        notes.append(f"low score ({score:.1f})")
-
-    if has_high_value_enrichment:
-        notes.append("high-value enrichment match")
-        if bucket == "nurture":
-            bucket = "standard"
-            notes.append("upgraded nurture -> standard on enrichment")
-
-    if has_risk:
-        notes.append("risk insight present")
-        if bucket == "priority":
-            bucket = "standard"
-            notes.append("downgraded priority -> standard on risk")
-
-    return bucket, notes
-
-
-async def _load_metadata(session: AsyncSession) -> MetaData:
-    metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
-    return metadata
-
-
-async def route_lead(
-    session: AsyncSession,
-    lead_id: uuid.UUID,
-) -> dict[str, Any] | None:
-    metadata = await _load_metadata(session)
-    leads = metadata.tables.get("leads")
-    if leads is None:
-        raise RuntimeError("leads table not found")
-
-    lead_result = await session.execute(select(leads).where(leads.c.id == lead_id))
-    lead_row = lead_result.mappings().first()
-    if lead_row is None:
+async def route_lead(session: AsyncSession, lead_id: UUID) -> dict[str, Any] | None:
+    """Compute a routing decision, persist queue fields on ``Lead``, activity, and metrics."""
+    result = await session.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
+    if lead is None:
         return None
 
-    score = _to_float(lead_row.get("ranking_score") if "ranking_score" in lead_row else 0.0)
+    score = lead.ranking_score
+    decision: dict[str, Any]
+    if score is None:
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": "awaiting_rank",
+            "assigned_to": None,
+        }
+    elif score >= HIGH_VALUE_THRESHOLD:
+        bucket = "tier1_sdr"
+        reason = "high_value"
+        logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": reason,
+            "assigned_to": bucket,
+            "ranking_score": score,
+        }
+    elif score >= MEDIUM_VALUE_THRESHOLD:
+        bucket = "tier2_sdr"
+        reason = "medium_value"
+        logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": reason,
+            "assigned_to": bucket,
+            "ranking_score": score,
+        }
+    else:
+        bucket = "nurture_pool"
+        reason = "standard"
+        logger.debug("Routed lead %s score=%s -> %s (%s)", lead_id, score, bucket, reason)
+        decision = {
+            "lead_id": str(lead_id),
+            "routing_reason": reason,
+            "assigned_to": bucket,
+            "ranking_score": score,
+        }
 
-    insight_types: list[str] = []
-    insight_table = metadata.tables.get("lead_ai_insight")
-    if insight_table is not None:
-        insight_result = await session.execute(
-            select(insight_table.c.insight_type).where(insight_table.c.lead_id == lead_id)
-        )
-        insight_types = [row[0] for row in insight_result.all() if row[0]]
+    now = datetime.now(timezone.utc)
+    lead.assigned_to = decision.get("assigned_to")
+    lead.routing_reason = str(decision["routing_reason"])
+    lead.last_routed_at = now
+    await session.commit()
 
-    has_high_intent = any(t in HIGH_INTENT_INSIGHT_TYPES for t in insight_types)
-    has_risk = any(t in RISK_INSIGHT_TYPES for t in insight_types)
-
-    industry = _normalize(lead_row.get("industry"))
-    company_size = _normalize(lead_row.get("company_size"))
-    has_high_value_enrichment = industry in HIGH_VALUE_INDUSTRIES or company_size in HIGH_VALUE_COMPANY_SIZES
-
-    bucket, notes = _classify(
-        score,
-        has_high_intent=has_high_intent,
-        has_risk=has_risk,
-        has_high_value_enrichment=has_high_value_enrichment,
+    await fire_and_forget_increment(
+        METRIC_LEAD_ROUTED,
+        {
+            "lead_id": str(lead_id),
+            "routing_reason": str(decision["routing_reason"]),
+            "assigned_to": decision.get("assigned_to") or "",
+        },
     )
 
-    reason = " | ".join(notes)
-    now = datetime.now(timezone.utc)
+    await _record_routed_event(session, lead_id, decision)
+    return decision
 
-    update_values: dict[str, Any] = {}
-    if "assigned_to" in leads.c:
-        update_values["assigned_to"] = bucket
-    if "routing_reason" in leads.c:
-        update_values["routing_reason"] = reason
-    if "last_routed_at" in leads.c:
-        update_values["last_routed_at"] = now
 
-    if update_values:
-        await session.execute(update(leads).where(leads.c.id == lead_id).values(**update_values))
-        await session.commit()
-
-    return {
-        "lead_id": str(lead_id),
-        "assigned_to": bucket,
-        "reason": reason,
-        "last_routed_at": now.isoformat(),
-        "signals": {
-            "ranking_score": score,
-            "insight_types": insight_types,
-            "has_high_intent": has_high_intent,
-            "has_risk": has_risk,
-            "industry": industry or None,
-            "company_size": company_size or None,
-        },
-    }
+async def trigger_routing(lead_id: UUID) -> None:
+    """Synchronous-style trigger used by ingestion hooks; opens its own session."""
+    async with AsyncSessionLocal() as session:
+        await route_lead(session, lead_id)

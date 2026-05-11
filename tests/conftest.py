@@ -198,8 +198,9 @@ async def seeded_lead(db_session: AsyncSession) -> Any:
 # ---------------------------------------------------------------------------
 @pytest.fixture
 def patch_health_session(monkeypatch, session_factory):
-    health = pytest.importorskip("app.services.health.service")
-    monkeypatch.setattr(health, "AsyncSessionLocal", session_factory, raising=False)
+    from app.services.health import service as health_service
+
+    monkeypatch.setattr(health_service, "AsyncSessionLocal", session_factory, raising=False)
     return session_factory
 
 

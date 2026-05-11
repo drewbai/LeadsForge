@@ -23,6 +23,9 @@ def build_lead(
     ranking_score: float | None = None,
     ranking_explanation: str | None = None,
     last_ranked_at: datetime | None = None,
+    assigned_to: str | None = None,
+    routing_reason: str | None = None,
+    last_routed_at: datetime | None = None,
     lead_id: UUID | None = None,
     created_at: datetime | None = None,
 ) -> Lead:
@@ -33,6 +36,9 @@ def build_lead(
         ranking_score=ranking_score,
         ranking_explanation=ranking_explanation,
         last_ranked_at=last_ranked_at,
+        assigned_to=assigned_to,
+        routing_reason=routing_reason,
+        last_routed_at=last_routed_at,
         created_at=created_at or datetime.now(timezone.utc),
     )
 

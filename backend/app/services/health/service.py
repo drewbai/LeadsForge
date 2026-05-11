@@ -9,6 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import AsyncSessionLocal
+from app.db.sync_reflection import reflect_bind
 from app.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ RECENT_ERROR_WINDOW_HOURS = 24
 
 async def _reflect_metadata(session: AsyncSession) -> MetaData:
     metadata = MetaData()
-    await session.run_sync(lambda sync_session: metadata.reflect(bind=sync_session.bind))
+    await session.run_sync(lambda s: reflect_bind(metadata, s))
     return metadata
 
 
