@@ -1,107 +1,49 @@
-import { useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import LeadDetails from "./components/LeadDetails";
-import LeadForm from "./components/LeadForm";
-import LeadList from "./components/LeadList";
-import { enrichLead, reScoreLead, scoreLead } from "./api";
-import type { Lead } from "./hooks/useLocalLeads";
-import { useLocalLeads } from "./hooks/useLocalLeads";
-import "./styles/app.css";
-import "./styles/list.css";
-import "./styles/nav.css";
+import AppLayout from "./layouts/AppLayout";
+import LeadsLayout from "./layouts/LeadsLayout";
+import AboutPage from "./pages/AboutPage";
+import HomePage from "./pages/HomePage";
+import PlaceholderPage from "./pages/PlaceholderPage";
+import LeadsDetailPage from "./pages/leads/LeadsDetailPage";
+import LeadsListPage from "./pages/leads/LeadsListPage";
+import LeadsNewPage from "./pages/leads/LeadsNewPage";
 
 export default function App() {
-  const { leads, addLead, updateLead, deleteLead, getLead } = useLocalLeads();
-  const [view, setView] = useState<"list" | "create" | "details">("list");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isWorking, setIsWorking] = useState<boolean>(false);
-
-  const selectedLead = selectedId ? getLead(selectedId) : undefined;
-
-  async function createLead(raw: { name: string; email: string; company: string }) {
-    const id = crypto.randomUUID();
-    setIsWorking(true);
-    try {
-      const enriched = await enrichLead(raw);
-      const scored = await scoreLead(enriched);
-      const lead: Lead = { id, ...raw, ...enriched, ...scored };
-      addLead(lead);
-      setSelectedId(id);
-      setView("details");
-    } finally {
-      setIsWorking(false);
-    }
-  }
-
-  async function rescoreLead(lead: Lead) {
-    setIsWorking(true);
-    try {
-      const scored = await reScoreLead(lead);
-      const updated: Lead = { ...lead, ...scored };
-      updateLead(lead.id, updated);
-      setSelectedId(lead.id);
-      setView("details");
-    } finally {
-      setIsWorking(false);
-    }
-  }
-
   return (
-    <div className="app">
-      <div className="nav">
-        <div className="navInner">
-          <div className="brand">LeadsForge</div>
-          <div className="navActions">
-            <button type="button" onClick={() => setView("list")} disabled={isWorking}>
-              Lead List
-            </button>
-            <button type="button" onClick={() => setView("create")} disabled={isWorking}>
-              Create Lead
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="container">
-        {view === "list" ? (
-          <LeadList
-            leads={leads}
-            onSelect={(id) => {
-              setSelectedId(id);
-              setView("details");
-            }}
-            onDelete={(id) => {
-              deleteLead(id);
-              if (selectedId === id) setSelectedId(null);
-              setView("list");
-            }}
-          />
-        ) : view === "create" ? (
-          <div className="stack">
-            <LeadForm onCreate={createLead} />
-            {isWorking ? <div className="muted">Working...</div> : null}
-          </div>
-        ) : selectedLead ? (
-          <div className="stack">
-            <LeadDetails
-              lead={selectedLead}
-              onBack={() => setView("list")}
-              onRescore={(lead) => rescoreLead(lead)}
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route index element={<HomePage />} />
+        <Route
+          path="metrics"
+          element={
+            <PlaceholderPage title="Metrics" phase={5} description="Metrics dashboard (UI Phase 5)." />
+          }
+        />
+        <Route
+          path="subscriptions"
+          element={
+            <PlaceholderPage
+              title="Subscriptions"
+              phase={6}
+              description="Subscription management (UI Phase 6)."
             />
-            {isWorking ? <div className="muted">Working...</div> : null}
-          </div>
-        ) : (
-          <div className="card">
-            <h2>Lead Details</h2>
-            <div className="muted">Lead not found.</div>
-            <div className="row">
-              <button type="button" onClick={() => setView("list")}>
-                Back to List
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <PlaceholderPage title="Settings" phase={7} description="Settings and admin (UI Phase 7)." />
+          }
+        />
+        <Route path="about" element={<AboutPage />} />
+        <Route element={<LeadsLayout />}>
+          <Route path="leads" element={<LeadsListPage />} />
+          <Route path="leads/new" element={<LeadsNewPage />} />
+          <Route path="leads/:leadId" element={<LeadsDetailPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
   );
 }

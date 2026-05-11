@@ -4,7 +4,9 @@ import os
 from typing import Any
 
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
+from app.api.v1.about_router import router as about_router
 from app.api.v1.health_router import router as v1_health_router
 from app.api.v1.metrics_router import router as metrics_router
 from app.api.v1.query_router import router as query_router
@@ -23,7 +25,21 @@ from app.version import VERSION
 
 logger = logging.getLogger(__name__)
 
+_cors_origins_raw = os.environ.get(
+    "LEADSFORGE_CORS_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173",
+)
+_cors_origins = [origin.strip() for origin in _cors_origins_raw.split(",") if origin.strip()]
+
 app = FastAPI()
+if _cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 app.include_router(health_router)
 app.include_router(ingestion_router)
 app.include_router(leads_router)
@@ -32,6 +48,7 @@ app.include_router(scoring_router)
 app.include_router(ai_router)
 app.include_router(ranking_router)
 app.include_router(routing_http_router)
+app.include_router(about_router)
 app.include_router(query_router)
 app.include_router(task_router)
 app.include_router(subscription_router)

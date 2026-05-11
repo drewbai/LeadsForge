@@ -76,6 +76,33 @@ button:disabled {
   justify-content: space-between;
 }
 
+.pageTitle {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.aboutStack {
+  gap: 14px;
+}
+
+.aboutCardTitle {
+  margin: 0 0 10px 0;
+  font-size: 1.05rem;
+}
+
+.aboutTightTop {
+  margin-top: 0;
+}
+
+.aboutTightBottom {
+  margin-bottom: 0;
+}
+
+.aboutFootnote {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
 .kv {
   display: grid;
   grid-template-columns: 140px 1fr;

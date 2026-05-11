@@ -40,6 +40,30 @@
   width: 220px;
 }
 
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+.leadListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.leadListTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.leadSearchCard {
+  padding-bottom: 14px;
+}
+
+.leadSearchGrid .field {
+  margin-top: 0;
+}
+
+
+@media (max-width: 640px) {
+  .leadSearchGrid {
+    grid-template-columns: 1fr;
+  }
 }

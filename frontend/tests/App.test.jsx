@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 
 import App from "../src/App";
 
 test("renders app heading", () => {
-  render(<App />);
+  render(
+    <MemoryRouter>
+      <App />
+    </MemoryRouter>,
+  );
 
-  expect(screen.getByText("LeadsForge Frontend OK")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "LeadsForge" })).toBeInTheDocument();
 });
