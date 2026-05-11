@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "leadsforge-backend"
-version = "0.0.1"
+version = "0.1.0"
 description = "LeadsForge backend skeleton"
 authors = []
 readme = "README.md"
