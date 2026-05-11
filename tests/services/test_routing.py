@@ -16,7 +16,7 @@ async def test_route_lead_assigns_priority_for_high_score(db_session, seeded_lea
     db_session.add(seeded_lead)
     await db_session.commit()
 
-    result = await route_lead(db_session, seeded_lead.id)
+    result = await routing_engine.route_lead(db_session, seeded_lead.id)
     assert result is not None
     assert "assigned_to" in result or "routing_reason" in result
     assert result.get("assigned_to") == "tier1_sdr"
@@ -26,6 +26,7 @@ async def test_route_lead_assigns_priority_for_high_score(db_session, seeded_lea
     assert seeded_lead.last_routed_at is not None
 
 
+@pytest.mark.asyncio
 async def test_route_lead_unknown_lead_returns_none(db_session) -> None:
     result = await routing_engine.route_lead(db_session, uuid4())
     assert result is None

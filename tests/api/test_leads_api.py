@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from app.models.lead import Lead
@@ -11,7 +11,10 @@ from sqlalchemy import select
 
 @pytest.mark.asyncio
 async def test_create_lead_endpoint_returns_201(client, db_session) -> None:
-    with patch("app.services.lead_service.record_activity_event", create=True):
+    with (
+        patch("app.services.lead_service.record_activity_event", create=True),
+        patch("app.services.lead_service.fire_and_forget_increment", new=AsyncMock()),
+    ):
         resp = await client.post(
             "/leads/",
             json={"email": "api@example.com", "source": "api-test"},
@@ -54,7 +57,10 @@ async def test_get_lead_endpoint_returns_existing(client, seeded_lead) -> None:
 
 @pytest.mark.asyncio
 async def test_create_lead_writes_to_db(client, db_session) -> None:
-    with patch("app.services.lead_service.record_activity_event", create=True):
+    with (
+        patch("app.services.lead_service.record_activity_event", create=True),
+        patch("app.services.lead_service.fire_and_forget_increment", new=AsyncMock()),
+    ):
         resp = await client.post(
             "/leads/",
             json={"email": "persisted@example.com", "source": "api-test"},

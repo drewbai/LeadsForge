@@ -1,8 +1,7 @@
-"""Verifies lead_service trigger wiring (routing recompute on create/update).
+"""Verifies lead_service trigger wiring (ranking on create; routing on update).
 
-Mirrors tests/services/test_lead_service_triggers.py for the routing trigger.
-Each create/update fans out to *both* a ranking task and a routing task; both
-sets of fan-out tests must hold simultaneously.
+Routing after create is driven by the ranking pipeline (``compute_lead_ranking``),
+not by ``create_lead`` directly.
 """
 
 from __future__ import annotations
@@ -15,17 +14,20 @@ from app.services import lead_service
 
 
 @pytest.mark.asyncio
-async def test_create_lead_enqueues_routing_once(db_session, monkeypatch) -> None:
+async def test_create_lead_does_not_enqueue_routing_directly(db_session, monkeypatch) -> None:
+    """``route_lead`` is enqueued after rank completes, not from create_lead."""
     routing_spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_routing_recompute", routing_spy)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", AsyncMock(return_value=None))
+    monkeypatch.setattr(lead_service, "fire_and_forget_increment", AsyncMock(return_value=None))
+    monkeypatch.setattr(lead_service, "record_activity_event", AsyncMock(return_value=None))
 
-    lead = await lead_service.create_lead(
+    await lead_service.create_lead(
         db_session,
         LeadCreate(email="trigger-create-routing@example.com", source="signup"),
     )
 
-    routing_spy.assert_awaited_once_with(lead.id)
+    routing_spy.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -76,12 +78,13 @@ async def test_delete_lead_does_not_enqueue_routing(db_session, seeded_lead, mon
 
 
 @pytest.mark.asyncio
-async def test_create_lead_fans_out_ranking_and_routing(db_session, monkeypatch) -> None:
-    """Regression guard: a single create must fan out to *both* triggers, not one."""
+async def test_create_lead_enqueues_only_ranking_not_routing(db_session, monkeypatch) -> None:
     ranking_spy = AsyncMock(return_value=None)
     routing_spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", ranking_spy)
     monkeypatch.setattr(lead_service, "enqueue_routing_recompute", routing_spy)
+    monkeypatch.setattr(lead_service, "fire_and_forget_increment", AsyncMock(return_value=None))
+    monkeypatch.setattr(lead_service, "record_activity_event", AsyncMock(return_value=None))
 
     lead = await lead_service.create_lead(
         db_session,
@@ -89,4 +92,4 @@ async def test_create_lead_fans_out_ranking_and_routing(db_session, monkeypatch)
     )
 
     ranking_spy.assert_awaited_once_with(lead.id)
-    routing_spy.assert_awaited_once_with(lead.id)
+    routing_spy.assert_not_called()

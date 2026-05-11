@@ -24,3 +24,8 @@ async def enqueue_route_lead(lead_id: UUID | None) -> None:
             )
     except Exception:
         logger.exception("Failed to enqueue route_lead task for lead %s", lead_id)
+
+
+async def enqueue_routing_recompute(lead_id: UUID | None) -> None:
+    """Best-effort route enqueue; alias for call sites that predate ``enqueue_route_lead``."""
+    await enqueue_route_lead(lead_id)

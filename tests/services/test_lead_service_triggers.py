@@ -17,6 +17,8 @@ from app.services import lead_service
 async def test_create_lead_enqueues_ranking_once(db_session, monkeypatch) -> None:
     spy = AsyncMock(return_value=None)
     monkeypatch.setattr(lead_service, "enqueue_ranking_recompute", spy)
+    monkeypatch.setattr(lead_service, "fire_and_forget_increment", AsyncMock(return_value=None))
+    monkeypatch.setattr(lead_service, "record_activity_event", AsyncMock(return_value=None))
 
     lead = await lead_service.create_lead(
         db_session,

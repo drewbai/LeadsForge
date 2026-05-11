@@ -1,3 +1,5 @@
+from typing import Any
+
 import asyncio
 import logging
 import os
@@ -98,7 +100,7 @@ async def _startup_task_worker() -> None:
 async def _shutdown_task_worker() -> None:
     """Signal the worker to stop and await its completion with a timeout fallback."""
     stop_event: asyncio.Event | None = getattr(app.state, "task_worker_stop_event", None)
-    worker_task: asyncio.Task | None = getattr(app.state, "task_worker_task", None)
+    worker_task: asyncio.Task[Any] | None = getattr(app.state, "task_worker_task", None)
 
     if stop_event is None or worker_task is None:
         return
