@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
 
-import { LocalLeadsProvider } from "../context/LocalLeadsContext";
+import { LeadsProvider } from "../context/LeadsContext";
 
 export default function LeadsLayout() {
   return (
-    <LocalLeadsProvider>
+    <LeadsProvider>
       <Outlet />
-    </LocalLeadsProvider>
+    </LeadsProvider>
   );
 }
