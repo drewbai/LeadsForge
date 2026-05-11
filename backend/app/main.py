@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from app.api.v1.about_router import router as about_router
 from app.api.v1.health_router import router as v1_health_router
 from app.api.v1.metrics_router import router as metrics_router
 from app.api.v1.query_router import router as query_router
@@ -47,6 +48,7 @@ app.include_router(scoring_router)
 app.include_router(ai_router)
 app.include_router(ranking_router)
 app.include_router(routing_http_router)
+app.include_router(about_router)
 app.include_router(query_router)
 app.include_router(task_router)
 app.include_router(subscription_router)

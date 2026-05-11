@@ -28,9 +28,14 @@ export default function AppLayout() {
             <NavLink to="/subscriptions" className={navLinkClass}>
               Subscriptions
             </NavLink>
-            <NavLink to="/settings" className={navLinkClass}>
-              Settings
-            </NavLink>
+            <div className="navSection" aria-label="Settings and help">
+              <NavLink to="/settings" className={navLinkClass}>
+                Settings
+              </NavLink>
+              <NavLink to="/about" className={navLinkClass}>
+                About
+              </NavLink>
+            </div>
           </nav>
         </div>
       </header>
