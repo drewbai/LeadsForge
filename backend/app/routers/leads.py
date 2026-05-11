@@ -52,3 +52,10 @@ async def get_lead(lead_id: UUID, db: DbSession) -> LeadRead:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
     return LeadRead.model_validate(lead)
+
+
+@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_lead(lead_id: UUID, db: DbSession) -> None:
+    deleted = await lead_service.delete_lead(db, lead_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")

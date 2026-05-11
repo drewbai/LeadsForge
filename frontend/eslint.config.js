@@ -19,8 +19,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
-        test: "readonly",
-        expect: "readonly",
+        ...globals.vitest,
       },
     },
     rules: {

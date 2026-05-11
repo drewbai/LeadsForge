@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
 import LeadList from "../../components/LeadList";
-import { useLocalLeadsContext } from "../../context/LocalLeadsContext";
+import { useLeadsContext } from "../../context/LeadsContext";
 
 export default function LeadsListPage() {
   const navigate = useNavigate();
-  const { leads, deleteLead } = useLocalLeadsContext();
+  const { leads, loading, error, refresh, deleteLead } = useLeadsContext();
 
   return (
     <div className="stack">
@@ -15,14 +15,32 @@ export default function LeadsListPage() {
           Create lead
         </button>
       </div>
-      <LeadList
-        leads={leads}
-        onSelect={(id) => navigate(`/leads/${id}`)}
-        onDelete={(id) => {
-          deleteLead(id);
-          navigate("/leads", { replace: true });
-        }}
-      />
+
+      {error ? (
+        <div className="card stack">
+          <div className="muted">Could not load leads: {error}</div>
+          <div className="row">
+            <button type="button" onClick={() => void refresh()}>
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {loading ? <div className="muted">Loading leads…</div> : null}
+
+      {!loading ? (
+        <LeadList
+          leads={leads}
+          onSelect={(id) => navigate(`/leads/${id}`)}
+          onDelete={(id) => {
+            void (async () => {
+              await deleteLead(id);
+              navigate("/leads", { replace: true });
+            })();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

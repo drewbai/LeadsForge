@@ -1,60 +1,44 @@
-import type { Lead } from "../hooks/useLocalLeads";
+import type { Lead } from "../types/lead";
 
 type LeadDetailsProps = {
   lead: Lead;
-  onRescore: (lead: Lead) => void;
+  onRecomputeRanking: () => void;
   onBack: () => void;
 };
 
+function row(label: string, value: string) {
+  return (
+    <div className="kv">
+      <div className="k">{label}</div>
+      <div className="v mono">{value}</div>
+    </div>
+  );
+}
+
 export default function LeadDetails(props: LeadDetailsProps) {
-  const lead = props.lead;
+  const { lead } = props;
 
   return (
     <div className="card">
-      <h2>Lead Details</h2>
+      <h2>Lead details</h2>
 
-      <div className="kv">
-        <div className="k">id</div>
-        <div className="v mono">{lead.id}</div>
-      </div>
-      <div className="kv">
-        <div className="k">name</div>
-        <div className="v">{String(lead.name ?? "")}</div>
-      </div>
-      <div className="kv">
-        <div className="k">email</div>
-        <div className="v mono">{String(lead.email ?? "")}</div>
-      </div>
-      <div className="kv">
-        <div className="k">company</div>
-        <div className="v">{String(lead.company ?? "")}</div>
-      </div>
-
-      {lead.email_domain !== undefined && (
-        <div className="kv">
-          <div className="k">email_domain</div>
-          <div className="v mono">{String(lead.email_domain ?? "")}</div>
-        </div>
-      )}
-      {lead.email_quality !== undefined && (
-        <div className="kv">
-          <div className="k">email_quality</div>
-          <div className="v mono">{String(lead.email_quality ?? "")}</div>
-        </div>
-      )}
-      {lead.score !== undefined && (
-        <div className="kv">
-          <div className="k">score</div>
-          <div className="v mono">{String(lead.score ?? "")}</div>
-        </div>
-      )}
+      {row("id", lead.id)}
+      {row("email", lead.email)}
+      {row("source", lead.source)}
+      {row("created_at", lead.created_at)}
+      {row("ranking_score", lead.ranking_score === null ? "—" : String(lead.ranking_score))}
+      {row("ranking_explanation", lead.ranking_explanation ?? "—")}
+      {row("last_ranked_at", lead.last_ranked_at ?? "—")}
+      {row("assigned_to", lead.assigned_to ?? "—")}
+      {row("routing_reason", lead.routing_reason ?? "—")}
+      {row("last_routed_at", lead.last_routed_at ?? "—")}
 
       <div className="row split">
         <button type="button" onClick={props.onBack}>
-          Back to List
+          Back to list
         </button>
-        <button type="button" onClick={() => props.onRescore(lead)}>
-          Re-score Lead
+        <button type="button" onClick={props.onRecomputeRanking}>
+          Recompute ranking
         </button>
       </div>
     </div>

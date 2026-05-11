@@ -45,6 +45,16 @@ async def test_leads_crud() -> None:
         assert get_response.status_code == 200
         assert get_response.json() == created_lead
 
+        delete_response = await client.delete(f"/leads/{created_lead['id']}")
+        assert delete_response.status_code == 204
+
+        get_missing = await client.get(f"/leads/{created_lead['id']}")
+        assert get_missing.status_code == 404
+
+        list_after = await client.get("/leads/")
+        assert list_after.status_code == 200
+        assert list_after.json() == []
+
     app.dependency_overrides.clear()
 
     await engine.dispose()

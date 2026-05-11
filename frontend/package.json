@@ -19,12 +19,13 @@
     "vite": "*"
   },
   "devDependencies": {
+    "@eslint/js": "*",
     "@testing-library/jest-dom": "*",
     "@testing-library/react": "*",
     "@vitejs/plugin-react": "*",
-    "@eslint/js": "*",
     "eslint": "*",
     "globals": "*",
+    "jsdom": "^29.1.1",
     "prettier": "*",
     "vitest": "*"
   }

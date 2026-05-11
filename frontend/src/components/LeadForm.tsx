@@ -1,31 +1,32 @@
 import { useState } from "react";
 
 type LeadFormProps = {
-  onCreate: (lead: { name: string; email: string; company: string }) => void;
+  defaultSource?: string;
+  onCreate: (lead: { email: string; source: string }) => void;
 };
 
 export default function LeadForm(props: LeadFormProps) {
-  const [name, setName] = useState<string>("");
+  const { defaultSource = "manual-ui" } = props;
   const [email, setEmail] = useState<string>("");
-  const [company, setCompany] = useState<string>("");
+  const [source, setSource] = useState<string>(defaultSource);
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    props.onCreate({ name, email, company });
+    props.onCreate({ email: email.trim(), source: source.trim() || defaultSource });
   }
 
   return (
     <form className="card" onSubmit={onSubmit}>
-      <h2>Lead</h2>
-
-      <label className="field">
-        <span className="label">Name</span>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
-      </label>
+      <h2>New lead</h2>
+      <p className="muted">
+        Leads are stored in the API (email + source). Ranking runs on the server after create.
+      </p>
 
       <label className="field">
         <span className="label">Email</span>
         <input
+          type="email"
+          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="jane@example.com"
@@ -33,16 +34,16 @@ export default function LeadForm(props: LeadFormProps) {
       </label>
 
       <label className="field">
-        <span className="label">Company</span>
+        <span className="label">Source</span>
         <input
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          placeholder="Acme Inc."
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          placeholder="campaign, referral, csv, …"
         />
       </label>
 
       <div className="row">
-        <button type="submit">Create Lead</button>
+        <button type="submit">Create lead</button>
       </div>
     </form>
   );

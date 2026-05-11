@@ -8,12 +8,12 @@ export default function HomePage() {
       <div className="card">
         <h1>LeadsForge</h1>
         <p className="muted">
-          Lead workspace UI — Phase 1 adds the app shell, routes, and navigation. Later phases connect
-          search, API auth, metrics, subscriptions, and settings.
+          Phase 2 connects the leads workspace to the FastAPI backend: list, create, detail, delete, and
+          ranking recompute. Run the API on port 8000 (Vite proxies API routes in dev), then open Leads.
         </p>
         <div className="row split">
           <button type="button" onClick={() => navigate("/leads")}>
-            Open leads (local demo)
+            Open leads
           </button>
         </div>
       </div>
