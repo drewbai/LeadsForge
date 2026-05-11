@@ -131,6 +131,9 @@ async def test_execute_task_route_lead_returns_decision(db_session, task_engine,
     outcome = await worker.execute_task(db_session, task)
     assert outcome["status"] == "success"
     assert outcome["result"]["routing"]["assigned_to"] == "tier2_sdr"
+    await db_session.refresh(seeded_lead)
+    assert seeded_lead.assigned_to == "tier2_sdr"
+    assert seeded_lead.routing_reason == "medium_value"
 
 
 async def test_execute_task_happy_path_calls_handler_and_marks_success(db_session, task_engine) -> None:
