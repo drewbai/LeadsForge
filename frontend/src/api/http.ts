@@ -17,6 +17,19 @@ export function apiUrl(path: string): string {
   return `${API_BASE}${normalized}`;
 }
 
+/** Append query string; omits empty, null, or undefined values. */
+export function withQuery(path: string, params: Record<string, string | number | undefined | null>): string {
+  const usp = new URLSearchParams();
+  for (const [key, raw] of Object.entries(params)) {
+    if (raw === undefined || raw === null) continue;
+    const s = String(raw).trim();
+    if (s === "") continue;
+    usp.set(key, s);
+  }
+  const q = usp.toString();
+  return q === "" ? path : `${path}?${q}`;
+}
+
 async function readErrorDetail(res: Response): Promise<string | null> {
   const text = await res.text();
   if (!text) return null;
@@ -29,8 +42,8 @@ async function readErrorDetail(res: Response): Promise<string | null> {
   }
 }
 
-export async function apiGetJson<T>(path: string): Promise<T> {
-  const res = await fetch(apiUrl(path));
+export async function apiGetJson<T>(pathWithOptionalQuery: string): Promise<T> {
+  const res = await fetch(apiUrl(pathWithOptionalQuery));
   if (!res.ok) {
     const detail = await readErrorDetail(res);
     throw new ApiError(res.status, res.statusText, detail);
