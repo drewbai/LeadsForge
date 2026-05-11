@@ -13,7 +13,6 @@ from app.models.metric import METRIC_AI_INSIGHT_GENERATED
 from app.services.ai.base import AIProvider
 from app.services.metrics.service import fire_and_forget_increment
 from app.services.ranking.triggers import enqueue_ranking_recompute
-from app.services.routing.triggers import enqueue_routing_recompute
 
 logger = logging.getLogger(__name__)
 
