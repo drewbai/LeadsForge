@@ -4,6 +4,10 @@ type LeadListProps = {
   leads: Lead[];
   onSelect: (leadId: string) => void;
   onDelete: (leadId: string) => void;
+  /** Shown when `leads.length === 0` */
+  emptyMessage?: string;
+  /** e.g. "Showing 1–50 of 240" */
+  resultHint?: string;
 };
 
 function formatRank(score: number | null): string {
@@ -20,12 +24,18 @@ function formatWhen(iso: string): string {
 }
 
 export default function LeadList(props: LeadListProps) {
+  const emptyMessage =
+    props.emptyMessage ?? "No leads yet. Create one to get started.";
+
   return (
     <div className="card">
-      <h2>Lead list</h2>
+      <div className="leadListHeader">
+        <h2 className="leadListTitle">Lead list</h2>
+        {props.resultHint ? <span className="muted">{props.resultHint}</span> : null}
+      </div>
 
       {props.leads.length === 0 ? (
-        <div className="muted">No leads yet. Create one to get started.</div>
+        <div className="muted">{emptyMessage}</div>
       ) : (
         <div className="tableWrap">
           <table className="leadTable">
