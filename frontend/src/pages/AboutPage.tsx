@@ -65,6 +65,10 @@ export default function AboutPage() {
       </AboutCard>
 
       <AboutCard title="Versions">
+        <p className="muted aboutTightTop">
+          UI Phase 4 — Lead Detail + Activity Timeline: <span className="mono">GET /api/v1/leads/:id</span>,{" "}
+          <span className="mono">GET/POST /api/v1/leads/:id/activity</span>.
+        </p>
         {kvRow("Frontend (package.json)", __LF_FRONTEND_PKG_VERSION__)}
         {kvRow(
           "Backend (pyproject.toml · Poetry)",

@@ -8,6 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.v1.about_router import router as about_router
 from app.api.v1.health_router import router as v1_health_router
+from app.api.v1.leads_detail_router import router as leads_detail_router
 from app.api.v1.metrics_router import router as metrics_router
 from app.api.v1.query_router import router as query_router
 from app.api.v1.ranking_router import router as ranking_router
@@ -50,6 +51,7 @@ app.include_router(ranking_router)
 app.include_router(routing_http_router)
 app.include_router(about_router)
 app.include_router(query_router)
+app.include_router(leads_detail_router)
 app.include_router(task_router)
 app.include_router(subscription_router)
 app.include_router(metrics_router)
