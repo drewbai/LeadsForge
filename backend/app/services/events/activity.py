@@ -20,6 +20,8 @@ async def record_activity_event(
     event_type: str,
     payload: dict[str, Any] | None = None,
     performed_by: str | None = None,
+    *,
+    activity_details: str | None = None,
 ) -> dict[str, Any]:
     """Persist an ActivityEvent row into ``lead_activity_log`` and dispatch.
 
@@ -35,6 +37,12 @@ async def record_activity_event(
     event_id = uuid4()
     created_at = datetime.now(timezone.utc)
 
+    details_value: str | None
+    if activity_details is not None:
+        details_value = activity_details
+    else:
+        details_value = str(payload) if payload else None
+
     if activity_table is not None:
         try:
             await session.execute(
@@ -42,7 +50,7 @@ async def record_activity_event(
                     id=event_id,
                     lead_id=lead_id,
                     activity_type=event_type,
-                    activity_details=str(payload) if payload else None,
+                    activity_details=details_value,
                     performed_by=performed_by,
                 )
             )

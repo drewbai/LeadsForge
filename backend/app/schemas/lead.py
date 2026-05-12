@@ -22,3 +22,8 @@ class LeadRead(BaseModel):
     assigned_to: str | None = None
     routing_reason: str | None = None
     last_routed_at: datetime | None = None
+    # Optional CRM fields — populated when present on ORM / future migrations; else null.
+    full_name: str | None = None
+    company: str | None = None
+    status: str | None = None
+    updated_at: datetime | None = None
